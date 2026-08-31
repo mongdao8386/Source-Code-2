@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import type { Locale } from '@/i18n/routing';
+import { safeLocale } from '@/i18n/routing';
 import { getSessionStaff } from '@/lib/auth/guards';
 import { AdminShell } from '@/components/admin/AdminShell';
 
@@ -14,7 +14,7 @@ export default async function DashLayout({
   children: ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = (await params) as { locale: Locale };
+  const locale = safeLocale((await params).locale);
   setRequestLocale(locale);
 
   const staff = await getSessionStaff();

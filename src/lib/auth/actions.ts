@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { audit } from '@/lib/audit';
 import { loginLimiter } from '@/lib/ratelimit';
-import { defaultLocale } from '@/i18n/routing';
+import { defaultLocale, safeLocale } from '@/i18n/routing';
 
 export type ActionState = { error?: string; ok?: boolean; data?: unknown };
 
@@ -85,7 +85,7 @@ export async function signInAction(
 }
 
 export async function signOutAction(formData: FormData): Promise<void> {
-  const locale = (formData.get('locale') as string) || defaultLocale;
+  const locale = safeLocale(formData.get('locale'));
   const supabase = await createClient();
   const {
     data: { user },
