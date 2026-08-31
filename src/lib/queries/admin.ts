@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { createClient } from '@/lib/supabase/server';
+import { PHOTOS_FK, assertNoError } from '@/lib/queries/photos-fk';
 import type {
   AuditLog,
   Category,
@@ -47,11 +48,12 @@ export async function listModels(): Promise<
   Array<Model & { photo_count: number }>
 > {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('models')
-    .select('*, model_photos(count)')
+    .select(`*, model_photos!${PHOTOS_FK}(count)`)
     .order('display_order', { ascending: true })
     .order('updated_at', { ascending: false });
+  assertNoError('admin-list-models', error);
   return ((data ?? []) as Array<Model & { model_photos: Array<{ count: number }> }>).map(
     (m) => ({ ...m, photo_count: m.model_photos?.[0]?.count ?? 0 }),
   );
@@ -61,11 +63,12 @@ export async function getModelForEdit(
   id: string,
 ): Promise<(Model & { photos: ModelPhoto[] }) | null> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('models')
-    .select('*, model_photos(*)')
+    .select(`*, model_photos!${PHOTOS_FK}(*)`)
     .eq('id', id)
     .maybeSingle();
+  assertNoError('admin-model-edit', error);
   if (!data) return null;
   const row = data as Model & { model_photos: ModelPhoto[] };
   return {

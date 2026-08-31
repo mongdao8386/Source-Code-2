@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cache } from 'react';
 import { createAnonClient } from '@/lib/supabase/anon';
+import { PHOTOS_FK, assertNoError } from '@/lib/queries/photos-fk';
 import type {
   Category,
   Model,
@@ -19,7 +20,11 @@ import type {
 
 export const getSiteSettings = cache(async (): Promise<PublicSiteSettings> => {
   const supabase = createAnonClient();
-  const { data } = await supabase.from('public_site_settings').select('*').maybeSingle();
+  const { data, error } = await supabase
+    .from('public_site_settings')
+    .select('*')
+    .maybeSingle();
+  assertNoError('site-settings', error);
   return (
     data ?? {
       telegram_channel_url: '',
@@ -33,10 +38,11 @@ export const getSiteSettings = cache(async (): Promise<PublicSiteSettings> => {
 
 export const getCategories = cache(async (): Promise<Category[]> => {
   const supabase = createAnonClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('categories')
     .select('*')
     .order('sort_order', { ascending: true });
+  assertNoError('categories', error);
   return data ?? [];
 });
 
@@ -49,7 +55,7 @@ export const getPublishedModels = cache(
     const supabase = createAnonClient();
     let query = supabase
       .from('models')
-      .select('*, model_photos(*)')
+      .select(`*, model_photos!${PHOTOS_FK}(*)`)
       .eq('status', 'published')
       .order('display_order', { ascending: true })
       .order('published_at', { ascending: false });
@@ -57,7 +63,8 @@ export const getPublishedModels = cache(
     if (opts.city) query = query.eq('city', opts.city);
     if (opts.limit) query = query.limit(opts.limit);
 
-    const { data } = await query;
+    const { data, error } = await query;
+    assertNoError('published-models', error);
     let rows = (data ?? []) as Array<Model & { model_photos: ModelPhoto[] }>;
 
     if (opts.category) {
@@ -82,12 +89,13 @@ export const getModelBySlug = cache(
     slug: string,
   ): Promise<(Model & { photos: ModelPhoto[] }) | null> => {
     const supabase = createAnonClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('models')
-      .select('*, model_photos(*)')
+      .select(`*, model_photos!${PHOTOS_FK}(*)`)
       .eq('slug', slug)
       .eq('status', 'published')
       .maybeSingle();
+    assertNoError('model-by-slug', error);
     if (!data) return null;
     const row = data as Model & { model_photos: ModelPhoto[] };
     const photos = [...(row.model_photos ?? [])].sort(
@@ -99,21 +107,23 @@ export const getModelBySlug = cache(
 
 export const getPublishedTestimonials = cache(async (): Promise<Testimonial[]> => {
   const supabase = createAnonClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('testimonials')
     .select('*')
     .eq('is_published', true)
     .order('sort_order', { ascending: true });
+  assertNoError('testimonials', error);
   return data ?? [];
 });
 
 export const getPage = cache(async (slug: string): Promise<Page | null> => {
   const supabase = createAnonClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('pages')
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle();
+  assertNoError('page', error);
   return data ?? null;
 });

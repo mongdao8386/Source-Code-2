@@ -27,7 +27,9 @@ export default async function AuditPage() {
                 <td className="px-4 py-2 tabular-nums text-bone-faint">
                   {new Date(r.created_at).toLocaleString()}
                 </td>
-                <td className="px-4 py-2 text-bone-dim">{r.actor_id?.slice(0, 8) ?? '—'}</td>
+                <td className="px-4 py-2 text-bone-dim">
+                  {r.actor_email ?? r.actor_id?.slice(0, 8) ?? '—'}
+                </td>
                 <td className="px-4 py-2 text-gold">{r.action}</td>
                 <td className="px-4 py-2 text-bone-dim">
                   {r.entity}

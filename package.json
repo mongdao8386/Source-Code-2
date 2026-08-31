@@ -18,7 +18,8 @@
     "e2e": "playwright test",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
-    "seed:owner": "tsx scripts/seed-owner.ts"
+    "seed:owner": "tsx scripts/seed-owner.ts",
+    "sql:bundle": "node scripts/bundle-sql.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

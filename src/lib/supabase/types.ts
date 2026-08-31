@@ -123,6 +123,7 @@ export type AdminInvite = {
 export type AuditLog = {
   id: number;
   actor_id: string | null;
+  actor_email: string | null;
   action: string;
   entity: string;
   entity_id: string | null;
@@ -233,7 +234,10 @@ export type Database = {
       >;
       audit_logs: TableShape<
         AuditLog,
-        PartialBy<AuditLog, 'id' | 'created_at' | 'meta' | 'ip' | 'actor_id' | 'entity_id'>,
+        PartialBy<
+          AuditLog,
+          'id' | 'created_at' | 'meta' | 'ip' | 'actor_id' | 'actor_email' | 'entity_id'
+        >,
         Partial<AuditLog>
       >;
       click_events: TableShape<

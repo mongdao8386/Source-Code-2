@@ -46,8 +46,15 @@ export function buildCsp() {
     'worker-src': ["'self'", 'blob:'],
     'manifest-src': ["'self'"],
     'frame-src': ["'none'"],
-    'upgrade-insecure-requests': [],
   };
+
+  // Only meaningful when the site is actually served over TLS. On an http
+  // origin it rewrites same-origin Server Action POSTs to https://, which then
+  // fail with ERR_SSL_PROTOCOL_ERROR — that breaks sign-in, TOTP enrolment and
+  // every CMS form when running locally or over plain http.
+  if (clientEnv.NEXT_PUBLIC_SITE_URL.startsWith('https://')) {
+    directives['upgrade-insecure-requests'] = [];
+  }
 
   const header = Object.entries(directives)
     .map(([key, val]) => (val.length ? `${key} ${val.join(' ')}` : key))
