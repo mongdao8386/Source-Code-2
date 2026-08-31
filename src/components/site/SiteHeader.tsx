@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitch } from '@/components/site/LocaleSwitch';
@@ -17,25 +17,49 @@ export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Transparent over the hero, solid once past it — keeps the full-bleed
+  // opening uninterrupted without losing legibility on scroll.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-ink/80 backdrop-blur-md">
+    <header
+      className={cn(
+        'fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-lux',
+        scrolled || open
+          ? 'border-b border-line bg-ink/85 backdrop-blur-md'
+          : 'border-b border-transparent bg-transparent',
+      )}
+    >
       <div className="mx-auto flex h-16 w-full max-w-[82rem] items-center justify-between px-5 sm:px-8 lg:px-12">
         <Link
           href="/"
-          className="font-display text-lg tracking-tight text-bone"
           onClick={() => setOpen(false)}
+          className="font-display text-xl leading-none tracking-tight text-bone"
         >
           STUDIO<span className="text-gold">.</span>
         </Link>
 
-        <nav className="hidden items-center gap-9 md:flex">
+        <nav className="hidden items-center gap-10 md:flex">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className={cn(
-                'text-xs uppercase tracking-[0.18em] transition-colors',
+                'link-wipe text-[0.6875rem] uppercase tracking-[0.22em] transition-colors',
                 pathname === l.href ? 'text-gold' : 'text-bone-dim hover:text-bone',
               )}
             >
@@ -48,37 +72,53 @@ export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
 
         <button
           type="button"
-          className="p-2 text-bone md:hidden"
+          className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
           aria-label={open ? t('close') : t('menu')}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
-          <span className="block h-px w-6 bg-current" />
-          <span className={cn('mt-1.5 block h-px w-6 bg-current transition-opacity', open && 'opacity-0')} />
-          <span className="mt-1.5 block h-px w-6 bg-current" />
+          <span
+            className={cn(
+              'block h-px w-6 bg-bone transition-transform duration-400 ease-lux',
+              open && 'translate-y-[3.5px] rotate-45',
+            )}
+          />
+          <span
+            className={cn(
+              'block h-px w-6 bg-bone transition-transform duration-400 ease-lux',
+              open && '-translate-y-[3.5px] -rotate-45',
+            )}
+          />
         </button>
       </div>
 
-      {open && (
-        <div className="border-t border-line bg-ink px-5 pb-8 pt-4 md:hidden">
-          <div className="flex flex-col gap-5">
-            {links.map((l) => (
+      {/* Full-screen mobile menu with oversized type. */}
+      <div
+        className={cn(
+          'fixed inset-0 top-16 bg-ink transition-all duration-500 ease-lux md:hidden',
+          open ? 'visible opacity-100' : 'invisible opacity-0',
+        )}
+      >
+        <div className="flex h-full flex-col justify-between px-5 pb-12 pt-8">
+          <nav className="flex flex-col">
+            {links.map((l, i) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="text-sm uppercase tracking-[0.18em] text-bone-dim"
+                className="border-b border-line py-5 font-display text-4xl text-bone"
+                style={{ transitionDelay: `${i * 60}ms` }}
               >
                 {t(l.key)}
               </Link>
             ))}
-            <div className="flex items-center justify-between pt-2">
-              <LocaleSwitch />
-              <BookingButton telegramUrl={telegramUrl} size="sm" label={t('book')} />
-            </div>
+          </nav>
+          <div className="flex items-center justify-between">
+            <LocaleSwitch />
+            <BookingButton telegramUrl={telegramUrl} label={t('book')} />
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

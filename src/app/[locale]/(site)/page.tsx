@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/site/Reveal';
+import { Marquee } from '@/components/site/Marquee';
 import { ModelCard } from '@/components/site/ModelCard';
 import { BookingButton } from '@/components/site/BookingButton';
 import {
@@ -26,8 +27,6 @@ export async function generateMetadata({
   const { locale } = await params;
   const settings = await getSiteSettings();
   const headline = tField(settings.hero, 'headline', locale);
-  // Fall through to the layout's default title rather than rendering the
-  // template against a placeholder ("Studio · Studio").
   return headline ? { title: headline } : {};
 }
 
@@ -42,7 +41,7 @@ export default async function HomePage({
   const [tr, settings, models, categories, testimonials] = await Promise.all([
     getTranslations('home'),
     getSiteSettings(),
-    getPublishedModels({ limit: 6 }),
+    getPublishedModels({ limit: 8 }),
     getCategories(),
     getPublishedTestimonials(),
   ]);
@@ -50,101 +49,154 @@ export default async function HomePage({
   const heroImage = tField(settings.hero, 'image', locale);
   const headline = tField(settings.hero, 'headline', locale);
   const sub = tField(settings.hero, 'sub', locale);
+  const words = headline.split(' ');
+  const lead = models[0];
 
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[86vh] items-end overflow-hidden">
+      <section className="relative flex min-h-[92svh] flex-col justify-end overflow-hidden">
         {heroImage ? (
-          <Image
-            src={publicPhotoUrl(heroImage)}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
+          <>
+            <Image
+              src={publicPhotoUrl(heroImage)}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="scale-105 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/25" />
+          </>
         ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_70%_10%,#1c1c1f_0%,#0a0a0b_60%)]" />
+          <div className="aurora absolute inset-0" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent" />
 
-        <Container className="relative pb-16 pt-40">
-          <p className="kicker">{tr('eyebrow')}</p>
-          <h1 className="mt-5 max-w-[16ch] text-hero text-bone">{headline}</h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-bone-dim">{sub}</p>
-          <div className="mt-9 flex flex-wrap items-center gap-4">
-            <BookingButton telegramUrl={settings.telegram_channel_url} label={tr('ctaButton')} />
-            <Link
-              href="/models"
-              className="text-xs uppercase tracking-[0.2em] text-bone-dim underline-offset-8 hover:text-bone hover:underline"
-            >
-              {tr('featuredMore')}
-            </Link>
+        <Container className="relative pb-14 pt-40">
+          <Reveal>
+            <p className="kicker text-gold">{tr('eyebrow')}</p>
+          </Reveal>
+
+          <h1 className="mt-7 max-w-[14ch] text-mega leading-[0.86] tracking-[-0.045em] text-bone">
+            {words.map((w, i) => (
+              <Reveal as="span" key={i} variant="mask" delay={i * 90}>
+                {w}
+              </Reveal>
+            ))}
+          </h1>
+
+          <div className="mt-10 flex flex-col gap-8 border-t border-line pt-8 md:flex-row md:items-end md:justify-between">
+            <Reveal delay={200}>
+              <p className="max-w-sm text-sm leading-relaxed text-bone-dim">{sub}</p>
+            </Reveal>
+            <Reveal delay={300}>
+              <div className="flex flex-wrap items-center gap-6">
+                <BookingButton
+                  telegramUrl={settings.telegram_channel_url}
+                  label={tr('ctaButton')}
+                />
+                <Link
+                  href="/models"
+                  className="link-wipe text-xs uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
+                >
+                  {tr('featuredMore')}
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </Container>
       </section>
 
-      {/* ── Featured models ──────────────────────────────────── */}
-      <Container as="section" className="mt-28">
-        <div className="flex items-end justify-between border-b border-line pb-5">
-          <h2 className="text-display text-bone">{tr('featuredTitle')}</h2>
+      {/* ── Ticker ───────────────────────────────────────────── */}
+      {categories.length > 0 && (
+        <Marquee items={categories.map((c) => t(c.name, locale))} />
+      )}
+
+      {/* ── Featured board ───────────────────────────────────── */}
+      <Container as="section" className="mt-24 md:mt-32">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+          <h2 className="text-section text-bone">{tr('featuredTitle')}</h2>
           <Link
             href="/models"
-            className="text-xs uppercase tracking-[0.2em] text-bone-dim hover:text-gold"
+            className="link-wipe text-xs uppercase tracking-[0.22em] text-bone-dim hover:text-gold"
           >
-            {tr('featuredMore')}
+            {tr('featuredMore')} &#8599;
           </Link>
         </div>
 
         {models.length ? (
-          <ul className="mt-12 grid grid-cols-2 gap-x-6 gap-y-14 md:grid-cols-3 lg:gap-x-10">
-            {models.map((m, i) => (
-              <Reveal as="li" key={m.id} delay={(i % 3) * 80}>
-                {/* offset every 2nd column for an asymmetric rhythm */}
-                <div className={i % 3 === 1 ? 'md:mt-16' : undefined}>
-                  <ModelCard model={m} locale={locale} priority={i < 3} />
+          <>
+            {/* Lead portrait, oversized — the scale break the grid needs. */}
+            {lead && (
+              <Reveal className="mt-12 grid gap-8 md:grid-cols-[1.35fr_1fr] md:items-end">
+                <ModelCard model={lead} locale={locale} index={0} priority />
+                <div className="pb-6">
+                  <p className="ordinal">01 / {String(models.length).padStart(2, '0')}</p>
+                  <p className="mt-4 font-display text-3xl leading-tight text-bone">
+                    {lead.stage_name}
+                  </p>
+                  {lead.city && <p className="kicker mt-3">{lead.city}</p>}
                 </div>
               </Reveal>
-            ))}
-          </ul>
+            )}
+
+            <ul className="mt-14 grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6">
+              {models.slice(1).map((m, i) => (
+                <Reveal as="li" key={m.id} delay={(i % 4) * 70}>
+                  <ModelCard model={m} locale={locale} index={i + 1} priority={i < 3} />
+                </Reveal>
+              ))}
+            </ul>
+          </>
         ) : (
-          <p className="mt-12 text-sm text-bone-dim">—</p>
+          <p className="mt-14 text-sm text-bone-faint">&#8212;</p>
         )}
       </Container>
 
-      {/* ── Categories ───────────────────────────────────────── */}
+      {/* ── Categories as an oversized list ──────────────────── */}
       {categories.length > 0 && (
-        <Container as="section" className="mt-32">
-          <h2 className="text-display text-bone">{tr('categoriesTitle')}</h2>
-          <div className="mt-8 flex flex-wrap gap-3">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={{ pathname: '/models', query: { category: c.slug } }}
-                className="border border-line-strong px-5 py-2 text-xs uppercase tracking-[0.18em] text-bone-dim transition-colors hover:border-gold hover:text-gold"
-              >
-                {t(c.name, locale)}
-              </Link>
+        <Container as="section" className="mt-28 md:mt-40">
+          <p className="kicker">{tr('categoriesTitle')}</p>
+          <ul className="mt-8 border-t border-line">
+            {categories.map((c, i) => (
+              <li key={c.id}>
+                <Link
+                  href={{ pathname: '/models', query: { category: c.slug } }}
+                  className="group flex items-baseline gap-5 border-b border-line py-5 transition-colors hover:bg-surface-1/40 md:py-7"
+                >
+                  <span className="ordinal w-8 shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="font-display text-3xl text-bone transition-all duration-500 ease-lux group-hover:translate-x-3 group-hover:text-gold md:text-5xl">
+                    {t(c.name, locale)}
+                  </span>
+                  <span className="ordinal ml-auto opacity-0 transition-opacity group-hover:opacity-100">
+                    &#8599;
+                  </span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </Container>
       )}
 
       {/* ── Testimonials ─────────────────────────────────────── */}
       {testimonials.length > 0 && (
-        <Container as="section" className="mt-32">
-          <h2 className="text-display text-bone">{tr('testimonialsTitle')}</h2>
-          <ul className="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((q) => (
-              <Reveal as="li" key={q.id}>
-                <blockquote className="border-l border-gold pl-6">
-                  <p className="font-display text-lg leading-snug text-bone">
-                    “{t(q.quote, locale)}”
+        <Container as="section" className="mt-28 md:mt-40">
+          <p className="kicker">{tr('testimonialsTitle')}</p>
+          <ul className="mt-10 grid gap-x-10 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((q, i) => (
+              <Reveal as="li" key={q.id} delay={(i % 3) * 90}>
+                <blockquote>
+                  <span aria-hidden className="font-display text-5xl leading-none text-gold">
+                    &ldquo;
+                  </span>
+                  <p className="mt-3 font-display text-xl leading-snug text-bone">
+                    {t(q.quote, locale)}
                   </p>
-                  <footer className="mt-4 text-xs uppercase tracking-[0.18em] text-bone-dim">
+                  <footer className="kicker mt-5 border-t border-line pt-3">
                     {q.author}
-                    {q.role ? ` · ${q.role}` : ''}
+                    {q.role ? ` — ${q.role}` : ''}
                   </footer>
                 </blockquote>
               </Reveal>
@@ -153,16 +205,30 @@ export default async function HomePage({
         </Container>
       )}
 
-      {/* ── CTA ──────────────────────────────────────────────── */}
-      <Container as="section" className="mt-32">
-        <div className="border border-line-strong px-8 py-20 text-center">
-          <h2 className="mx-auto max-w-[18ch] text-display text-bone">{tr('ctaTitle')}</h2>
-          <p className="mx-auto mt-5 max-w-md text-sm text-bone-dim">{tr('ctaBody')}</p>
-          <div className="mt-9 flex justify-center">
-            <BookingButton telegramUrl={settings.telegram_channel_url} label={tr('ctaButton')} />
-          </div>
-        </div>
-      </Container>
+      {/* ── Closing CTA ──────────────────────────────────────── */}
+      <section className="relative mt-28 overflow-hidden border-y border-line py-28 md:mt-40 md:py-40">
+        <div className="aurora absolute inset-0 opacity-60" />
+        <Container className="relative text-center">
+          <Reveal>
+            <h2 className="mx-auto max-w-[16ch] text-hero leading-[0.9] tracking-[-0.04em] text-bone">
+              {tr('ctaTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={150}>
+            <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-bone-dim">
+              {tr('ctaBody')}
+            </p>
+          </Reveal>
+          <Reveal delay={250}>
+            <div className="mt-10 flex justify-center">
+              <BookingButton
+                telegramUrl={settings.telegram_channel_url}
+                label={tr('ctaButton')}
+              />
+            </div>
+          </Reveal>
+        </Container>
+      </section>
     </>
   );
 }

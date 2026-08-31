@@ -12,7 +12,7 @@ export async function AnnouncementBar({ settings }: { settings: PublicSiteSettin
   if (!text) return null;
 
   return (
-    <div className="bg-gold px-4 py-2 text-center text-xs font-medium tracking-wide text-ink">
+    <div className="fixed inset-x-0 top-0 z-[60] bg-gold px-4 py-1.5 text-center text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-ink">
       {text}
     </div>
   );

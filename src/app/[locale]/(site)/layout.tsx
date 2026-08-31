@@ -23,6 +23,8 @@ export default async function SiteLayout({
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* The header is fixed so the hero runs full-bleed under it; every page
+          therefore carries its own top padding rather than relying on flow. */}
       <AnnouncementBar settings={settings} />
       <SiteHeader telegramUrl={settings.telegram_channel_url} />
       <main className="flex-1">{children}</main>

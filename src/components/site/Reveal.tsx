@@ -4,19 +4,22 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 /**
- * Scroll-triggered editorial reveal. Honours prefers-reduced-motion via the
- * CSS in globals.css (transition is neutralised there).
+ * Scroll-triggered reveal. `variant="mask"` wipes the child up from behind a
+ * clipped edge — use it for display lines; "fade" is the general case.
+ * prefers-reduced-motion neutralises the transition in globals.css.
  */
 export function Reveal({
   children,
   className,
   delay = 0,
+  variant = 'fade',
   as: As = 'div',
 }: {
   children: ReactNode;
   className?: string;
   delay?: number;
-  as?: 'div' | 'section' | 'li' | 'article';
+  variant?: 'fade' | 'mask';
+  as?: 'div' | 'section' | 'li' | 'article' | 'span' | 'h1' | 'h2';
 }) {
   const ref = useRef<HTMLElement>(null);
   const [shown, setShown] = useState(false);
@@ -31,19 +34,24 @@ export function Reveal({
           io.disconnect();
         }
       },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.05 },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
+  const style = delay ? { transitionDelay: `${delay}ms` } : undefined;
+
+  if (variant === 'mask') {
+    return (
+      <As ref={ref as never} className={cn('line-mask', className)} data-shown={shown}>
+        <span style={style}>{children}</span>
+      </As>
+    );
+  }
+
   return (
-    <As
-      ref={ref as never}
-      className={cn('reveal', className)}
-      data-shown={shown}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-    >
+    <As ref={ref as never} className={cn('reveal', className)} data-shown={shown} style={style}>
       {children}
     </As>
   );

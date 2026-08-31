@@ -7,34 +7,41 @@ export async function SiteFooter() {
   const nav = await getTranslations('nav');
   const year = new Date().getFullYear();
 
-  return (
-    <footer className="mt-32 border-t border-line py-14">
-      <Container className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="font-display text-2xl text-bone">
-            STUDIO<span className="text-gold">.</span>
-          </p>
-          <p className="mt-3 max-w-xs text-sm text-bone-dim">{t('built')}</p>
-        </div>
+  const links = [
+    { href: '/models', label: nav('models') },
+    { href: '/about', label: nav('about') },
+    { href: '/guide', label: nav('guide') },
+    { href: '/terms', label: nav('terms') },
+  ] as const;
 
-        <nav className="flex flex-wrap gap-x-8 gap-y-3 text-xs uppercase tracking-[0.18em] text-bone-dim">
-          <Link href="/models" className="hover:text-bone">
-            {nav('models')}
-          </Link>
-          <Link href="/about" className="hover:text-bone">
-            {nav('about')}
-          </Link>
-          <Link href="/guide" className="hover:text-bone">
-            {nav('guide')}
-          </Link>
-          <Link href="/terms" className="hover:text-bone">
-            {nav('terms')}
-          </Link>
+  return (
+    <footer className="mt-28 border-t border-line md:mt-40">
+      {/* Oversized wordmark — the closing beat, matching the hero's scale. */}
+      <Container className="py-16 md:py-24">
+        <p className="text-mega leading-[0.8] tracking-[-0.05em] text-surface-2">
+          STUDIO<span className="text-gold/30">.</span>
+        </p>
+      </Container>
+
+      <Container className="flex flex-col gap-8 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
+        <nav className="flex flex-wrap gap-x-8 gap-y-3">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="link-wipe text-[0.6875rem] uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
+            >
+              {l.label}
+            </Link>
+          ))}
         </nav>
 
-        <p className="text-xs text-bone-faint">
-          © {year} Studio. {t('rights')}
-        </p>
+        <div className="flex flex-col gap-1 text-[0.6875rem] uppercase tracking-[0.18em] text-bone-faint md:items-end">
+          <span>{t('built')}</span>
+          <span>
+            &copy; {year} Studio. {t('rights')}
+          </span>
+        </div>
       </Container>
     </footer>
   );

@@ -60,7 +60,14 @@ export function BookingButton({
       className={cn(buttonClass(variant, size), className)}
     >
       {label ?? tr('cta')}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden
+        className="transition-transform duration-500 ease-lux group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5"
+      >
         <path
           d="M7 17 17 7M17 7H8M17 7v9"
           stroke="currentColor"

@@ -31,9 +31,11 @@ export async function ContentPage({
   if (!page) notFound();
 
   return (
-    <Container className="pt-32">
-      <h1 className="text-display text-bone">{t(page.title, locale)}</h1>
-      <div className="mt-10">
+    <Container className="pt-36 md:pt-44">
+      <h1 className="max-w-[14ch] text-hero leading-[0.88] tracking-[-0.04em] text-bone">
+        {t(page.title, locale)}
+      </h1>
+      <div className="mt-14 border-t border-line pt-10">
         <Prose markdown={t(page.body, locale)} />
       </div>
     </Container>
