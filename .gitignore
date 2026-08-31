@@ -1,0 +1,47 @@
+# deps
+/node_modules
+/.pnp
+.pnp.js
+
+# next
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# production
+/dist
+
+# env
+.env
+.env*.local
+.env.production
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# testing
+/coverage
+/playwright-report
+/test-results
+/.playwright
+
+# editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# docker / caddy runtime
+/caddy_data
+/caddy_config
+
+# supabase local
+/supabase/.branches
+/supabase/.temp

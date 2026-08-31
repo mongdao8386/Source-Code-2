@@ -1,0 +1,33 @@
+{
+	email {$ACME_EMAIL}
+	# staging CA while testing DNS — comment out for production certs:
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	# Security headers not already emitted by Next.js.
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+		-Server
+	}
+
+	# Block the CMS from any external hint via the proxy as a belt-and-braces
+	# layer (the app already 404-cloaks non-staff).
+	@admin path /vi/admin* /en/admin*
+	header @admin X-Robots-Tag "noindex, nofollow"
+
+	reverse_proxy web:3000 {
+		header_up X-Real-IP {remote_host}
+	}
+}
+
+# Redirect apex/other hosts if present
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}

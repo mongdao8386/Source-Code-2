@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "models": "Models",
+    "about": "About",
+    "guide": "Guide",
+    "terms": "Terms",
+    "book": "Book",
+    "menu": "Menu",
+    "close": "Close",
+    "language": "Language"
+  },
+  "home": {
+    "eyebrow": "Studio · Casting",
+    "featuredTitle": "Featured faces",
+    "featuredMore": "See all models",
+    "categoriesTitle": "Categories",
+    "testimonialsTitle": "What clients say",
+    "ctaTitle": "Ready to shoot?",
+    "ctaBody": "Pick a model and talk to us directly on Telegram.",
+    "ctaButton": "Book on Telegram"
+  },
+  "models": {
+    "title": "Models",
+    "subtitle": "A curated roster of faces for every frame.",
+    "filterAll": "All",
+    "filterCity": "City",
+    "filterCategory": "Category",
+    "empty": "No models match yet.",
+    "height": "Height",
+    "experience": "Experience",
+    "years": "yrs",
+    "measurements": "Measurements",
+    "city": "Area"
+  },
+  "booking": {
+    "cta": "Book",
+    "comingSoon": "Coming soon",
+    "opensTelegram": "Opens Telegram in a new tab"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "contact": "Contact",
+    "built": "Designed by Studio"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you are looking for does not exist or has moved.",
+    "home": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "Please try again in a few minutes.",
+    "retry": "Try again"
+  },
+  "admin": {
+    "signIn": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "signInButton": "Sign in",
+    "mfaTitle": "Two-factor authentication",
+    "mfaEnrol": "Set up your authenticator app",
+    "mfaCode": "6-digit code",
+    "mfaVerify": "Verify",
+    "signOut": "Sign out",
+    "nav": {
+      "dashboard": "Overview",
+      "models": "Models",
+      "categories": "Categories",
+      "pages": "Pages",
+      "testimonials": "Testimonials",
+      "settings": "Settings",
+      "users": "Users",
+      "audit": "Audit log"
+    }
+  }
+}

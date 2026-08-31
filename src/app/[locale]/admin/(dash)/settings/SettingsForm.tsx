@@ -1,0 +1,189 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import type { SiteSettings } from '@/lib/supabase/types';
+import { updateSettingsAction } from './actions';
+import { Button } from '@/components/ui/Button';
+import { Input, Label, Textarea, FormError } from '@/components/ui/Field';
+
+type Bag = { vi?: string; en?: string };
+const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
+const obj = (v: unknown): Record<string, unknown> =>
+  v && typeof v === 'object' ? (v as Record<string, unknown>) : {};
+
+export function SettingsForm({ settings }: { settings: SiteSettings }) {
+  const hero = obj(settings.hero);
+  const socials = obj(settings.socials);
+  const ann = obj(settings.announcement);
+
+  const [form, setForm] = useState({
+    telegram_channel_url: settings.telegram_channel_url ?? '',
+    contact_email: settings.contact_email ?? '',
+    phone: settings.phone ?? '',
+    ig: (socials.instagram as string) ?? '',
+    fb: (socials.facebook as string) ?? '',
+    tt: (socials.tiktok as string) ?? '',
+    headline: bag(hero.headline),
+    sub: bag(hero.sub),
+    heroImage: (hero.image as string) ?? '',
+    annEnabled: Boolean(ann.enabled),
+    annText: bag(ann.text),
+    maintenance: Boolean(settings.maintenance_mode),
+  });
+  const [pending, start] = useTransition();
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    start(async () => {
+      const res = await updateSettingsAction({
+        telegram_channel_url: form.telegram_channel_url,
+        contact_email: form.contact_email,
+        phone: form.phone,
+        socials: { instagram: form.ig, facebook: form.fb, tiktok: form.tt },
+        hero: { headline: form.headline, sub: form.sub, image: form.heroImage },
+        announcement: { enabled: form.annEnabled, text: form.annText },
+        maintenance_mode: form.maintenance,
+      });
+      setMsg(
+        res.ok
+          ? { kind: 'ok', text: 'Đã lưu / Saved' }
+          : { kind: 'err', text: res.error === 'validation' ? 'Kiểm tra lại các trường.' : res.error },
+      );
+    });
+  }
+
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+
+  return (
+    <form onSubmit={submit} className="max-w-2xl space-y-10">
+      <section className="space-y-4">
+        <h2 className="kicker">Booking</h2>
+        <div>
+          <Label htmlFor="tg">Telegram channel URL</Label>
+          <Input
+            id="tg"
+            value={form.telegram_channel_url}
+            onChange={(e) => set({ telegram_channel_url: e.target.value })}
+            placeholder="https://t.me/your_channel"
+          />
+          <p className="mt-1 text-xs text-bone-faint">
+            Nút “Đặt lịch” trên toàn site sẽ mở link này. Để trống = nút bị vô hiệu hoá.
+          </p>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="kicker">Hero</h2>
+        <TwoLang
+          label="Headline"
+          value={form.headline}
+          onChange={(headline) => set({ headline })}
+        />
+        <TwoLang label="Sub" value={form.sub} onChange={(sub) => set({ sub })} textarea />
+        <div>
+          <Label htmlFor="hi">Hero image (storage path or https URL)</Label>
+          <Input
+            id="hi"
+            value={form.heroImage}
+            onChange={(e) => set({ heroImage: e.target.value })}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="kicker">Contact & socials</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="ce">Contact email</Label>
+            <Input id="ce" value={form.contact_email} onChange={(e) => set({ contact_email: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="ph">Phone</Label>
+            <Input id="ph" value={form.phone} onChange={(e) => set({ phone: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="ig">Instagram</Label>
+            <Input id="ig" value={form.ig} onChange={(e) => set({ ig: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="fb">Facebook</Label>
+            <Input id="fb" value={form.fb} onChange={(e) => set({ fb: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="tt">TikTok</Label>
+            <Input id="tt" value={form.tt} onChange={(e) => set({ tt: e.target.value })} />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="kicker">Announcement</h2>
+        <label className="flex items-center gap-3 text-sm text-bone-dim">
+          <input
+            type="checkbox"
+            checked={form.annEnabled}
+            onChange={(e) => set({ annEnabled: e.target.checked })}
+          />
+          Bật thanh thông báo
+        </label>
+        <TwoLang label="Text" value={form.annText} onChange={(annText) => set({ annText })} />
+      </section>
+
+      <section>
+        <label className="flex items-center gap-3 text-sm text-bone-dim">
+          <input
+            type="checkbox"
+            checked={form.maintenance}
+            onChange={(e) => set({ maintenance: e.target.checked })}
+          />
+          Maintenance mode
+        </label>
+      </section>
+
+      {msg && (msg.kind === 'err' ? <FormError>{msg.text}</FormError> : <p className="text-sm text-gold">{msg.text}</p>)}
+
+      <Button type="submit" disabled={pending}>
+        {pending ? '…' : 'Lưu / Save'}
+      </Button>
+    </form>
+  );
+}
+
+function TwoLang({
+  label,
+  value,
+  onChange,
+  textarea = false,
+}: {
+  label: string;
+  value: Bag;
+  onChange: (v: Bag) => void;
+  textarea?: boolean;
+}) {
+  const C = textarea ? Textarea : Input;
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <C
+          aria-label={`${label} VI`}
+          placeholder="VI"
+          value={value.vi ?? ''}
+          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
+            onChange({ ...value, vi: e.target.value })
+          }
+        />
+        <C
+          aria-label={`${label} EN`}
+          placeholder="EN"
+          value={value.en ?? ''}
+          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
+            onChange({ ...value, en: e.target.value })
+          }
+        />
+      </div>
+    </div>
+  );
+}

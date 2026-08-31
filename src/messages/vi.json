@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "models": "Người mẫu",
+    "about": "Về chúng tôi",
+    "guide": "Hướng dẫn",
+    "terms": "Điều khoản",
+    "book": "Đặt lịch",
+    "menu": "Menu",
+    "close": "Đóng",
+    "language": "Ngôn ngữ"
+  },
+  "home": {
+    "eyebrow": "Studio · Casting",
+    "featuredTitle": "Gương mặt nổi bật",
+    "featuredMore": "Xem tất cả người mẫu",
+    "categoriesTitle": "Thể loại",
+    "testimonialsTitle": "Khách hàng nói gì",
+    "ctaTitle": "Sẵn sàng cho buổi chụp?",
+    "ctaBody": "Chọn người mẫu và trao đổi trực tiếp với chúng tôi qua Telegram.",
+    "ctaButton": "Đặt lịch qua Telegram"
+  },
+  "models": {
+    "title": "Người mẫu",
+    "subtitle": "Tuyển chọn gương mặt cho từng khung hình.",
+    "filterAll": "Tất cả",
+    "filterCity": "Thành phố",
+    "filterCategory": "Thể loại",
+    "empty": "Chưa có người mẫu nào phù hợp.",
+    "height": "Chiều cao",
+    "experience": "Kinh nghiệm",
+    "years": "năm",
+    "measurements": "Số đo",
+    "city": "Khu vực"
+  },
+  "booking": {
+    "cta": "Đặt lịch",
+    "comingSoon": "Sắp ra mắt",
+    "opensTelegram": "Mở Telegram trong tab mới"
+  },
+  "footer": {
+    "rights": "Đã đăng ký bản quyền.",
+    "contact": "Liên hệ",
+    "built": "Thiết kế bởi Studio"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "body": "Trang bạn tìm không tồn tại hoặc đã được chuyển đi.",
+    "home": "Về trang chủ"
+  },
+  "error": {
+    "title": "Đã có lỗi xảy ra",
+    "body": "Vui lòng thử lại sau ít phút.",
+    "retry": "Thử lại"
+  },
+  "admin": {
+    "signIn": "Đăng nhập",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "signInButton": "Đăng nhập",
+    "mfaTitle": "Xác thực hai lớp",
+    "mfaEnrol": "Thiết lập ứng dụng xác thực",
+    "mfaCode": "Mã 6 chữ số",
+    "mfaVerify": "Xác nhận",
+    "signOut": "Đăng xuất",
+    "nav": {
+      "dashboard": "Tổng quan",
+      "models": "Người mẫu",
+      "categories": "Thể loại",
+      "pages": "Trang nội dung",
+      "testimonials": "Đánh giá",
+      "settings": "Cài đặt",
+      "users": "Người dùng",
+      "audit": "Nhật ký"
+    }
+  }
+}
