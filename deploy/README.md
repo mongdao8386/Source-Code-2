@@ -101,7 +101,8 @@ npx supabase db push   # if migrations changed
 - `https://<domain>/vi/admin` → **404** (not a login page) when logged out.
 - Sign in as owner → forced TOTP enrol → dashboard.
 - Settings → set Telegram URL → reload the home page → "Đặt lịch" is enabled and
-  opens that channel. (If it still reads "Sắp ra mắt", migration `0002` has not
-  been applied — the public settings view would be returning zero rows.)
+  opens that channel. (If it still reads "Sắp ra mắt", the
+  `public_site_settings` migration has not been applied — that view would be
+  returning zero rows.)
 - `curl -sI https://<domain>` shows `strict-transport-security`,
   `content-security-policy`, `x-frame-options: DENY`.

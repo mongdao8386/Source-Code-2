@@ -61,7 +61,7 @@ src/
                            · testimonials · settings · users(owner) · audit
   app/api/
     health · track/booking · admin/photos
-supabase/migrations/       0001_init.sql (schema + RLS + triggers + storage)
+supabase/migrations/       schema + RLS + triggers + storage (timestamped)
 supabase/seed.sql          settings singleton + starter categories + page stubs
 deploy/                     VPS runbook + pg_dump backup
 ```
