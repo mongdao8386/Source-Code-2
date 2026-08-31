@@ -14,7 +14,7 @@ export default async function AdminLoginPage() {
   const t = await getTranslations('admin');
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center px-6">
+    <div className="gutter-safe pad-safe-top pad-safe-bottom flex min-h-dvh flex-col items-center justify-center">
       <div className="mb-10 text-center">
         <p className="font-display text-2xl">
           STUDIO<span className="text-gold">.</span>

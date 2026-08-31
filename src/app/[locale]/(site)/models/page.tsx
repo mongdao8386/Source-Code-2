@@ -57,7 +57,7 @@ export default async function ModelsPage({
       </Container>
 
       {/* Filters stay in view while the board scrolls. */}
-      <div className="sticky top-16 z-30 border-b border-line bg-ink/85 backdrop-blur-md">
+      <div className="top-below-header sticky z-30 border-b border-line bg-ink/85 backdrop-blur-md">
         <Container className="flex flex-wrap items-center gap-x-1 gap-y-2 py-3">
           <FilterChip href={{ pathname: '/models' }} active={!category && !city}>
             {tr('filterAll')}
@@ -116,7 +116,7 @@ function FilterChip({
     <Link
       href={href}
       className={cn(
-        'px-3 py-1.5 text-[0.6875rem] uppercase tracking-[0.2em] transition-colors',
+        'tap-safe px-3 py-1.5 text-[0.6875rem] uppercase tracking-[0.2em] transition-colors',
         active ? 'text-gold' : 'text-bone-faint hover:text-bone',
       )}
     >

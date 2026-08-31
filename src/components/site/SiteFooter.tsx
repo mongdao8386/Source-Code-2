@@ -23,13 +23,13 @@ export async function SiteFooter() {
         </p>
       </Container>
 
-      <Container className="flex flex-col gap-8 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
+      <Container className="pad-safe-bottom flex flex-col gap-8 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
         <nav className="flex flex-wrap gap-x-8 gap-y-3">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className="link-wipe text-[0.6875rem] uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
+              className="tap-safe link-wipe text-[0.6875rem] uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
             >
               {l.label}
             </Link>

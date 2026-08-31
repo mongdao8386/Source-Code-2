@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
@@ -18,6 +18,16 @@ const sans = Inter({
   variable: '--font-inter',
   display: 'swap',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  // Draw into the notch/Dynamic Island area. Without this iOS keeps the page
+  // inside the safe area and env(safe-area-inset-*) always resolves to 0, so
+  // none of the padding below would ever apply.
+  viewportFit: 'cover',
+  themeColor: '#08080a',
+};
 
 export const metadata: Metadata = {
   title: 'Console',

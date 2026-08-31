@@ -104,12 +104,16 @@ export default async function ModelDetailPage({
       </Container>
 
       {/* Sticky mobile CTA */}
-      <div className="sticky bottom-0 z-40 border-t border-line bg-ink/90 p-4 backdrop-blur-md lg:hidden">
-        <BookingButton
-          telegramUrl={settings.telegram_channel_url}
-          modelId={model.id}
-          className="w-full"
-        />
+      {/* The home indicator / gesture bar overlaps anything at bottom:0, and
+          this is the site's only conversion action — pad past it. */}
+      <div className="pad-safe-bottom sticky bottom-0 z-40 border-t border-line bg-ink/90 px-4 pt-4 backdrop-blur-md lg:hidden">
+        <div className="pb-4">
+          <BookingButton
+            telegramUrl={settings.telegram_channel_url}
+            modelId={model.id}
+            className="w-full"
+          />
+        </div>
       </div>
     </>
   );

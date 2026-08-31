@@ -4,7 +4,7 @@ import { Container } from '@/components/ui/Container';
 // reachable (it lives outside the (site) group).
 export function MaintenanceScreen() {
   return (
-    <Container className="flex min-h-dvh flex-col items-center justify-center text-center">
+    <Container className="pad-safe-top pad-safe-bottom flex min-h-dvh flex-col items-center justify-center text-center">
       <p className="font-display text-3xl text-bone">
         STUDIO<span className="text-gold">.</span>
       </p>

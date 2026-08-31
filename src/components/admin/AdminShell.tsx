@@ -17,7 +17,7 @@ export async function AdminShell({
 
   return (
     <div className="grid min-h-dvh grid-cols-1 md:grid-cols-[15rem_1fr]">
-      <aside className="hidden flex-col border-r border-line bg-surface-1 md:flex">
+      <aside className="pad-safe-top hidden flex-col border-r border-line bg-surface-1 md:flex">
         <div className="border-b border-line px-5 py-5">
           <p className="font-display text-lg">
             STUDIO<span className="text-gold">.</span>
@@ -47,7 +47,7 @@ export async function AdminShell({
       </aside>
 
       <div className="flex flex-col">
-        <header className="flex items-center justify-between border-b border-line px-5 py-3 md:hidden">
+        <header className="pad-safe-top gutter-safe flex items-center justify-between border-b border-line py-3 md:hidden">
           <p className="font-display text-base">
             STUDIO<span className="text-gold">.</span>
           </p>
@@ -59,7 +59,7 @@ export async function AdminShell({
         </header>
 
         {/* mobile nav */}
-        <div className="border-b border-line px-3 py-2 md:hidden">
+        <div className="inset-safe-x border-b border-line px-3 py-2 md:hidden">
           <AdminNav
             role={role}
             horizontal
@@ -76,7 +76,7 @@ export async function AdminShell({
           />
         </div>
 
-        <main className="flex-1 px-5 py-8 lg:px-10">
+        <main className="gutter-safe pad-safe-bottom flex-1 py-8">
           <div className="mx-auto max-w-5xl">{children}</div>
         </main>
       </div>

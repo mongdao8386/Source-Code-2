@@ -16,7 +16,7 @@ export default async function AdminMfaPage() {
   if (aal?.currentLevel === 'aal2') redirect(adminHref());
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center px-6">
+    <div className="gutter-safe pad-safe-top pad-safe-bottom flex min-h-dvh flex-col items-center justify-center">
       <MfaClient />
     </div>
   );

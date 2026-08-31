@@ -28,7 +28,7 @@ export function LocaleSwitch({ className }: { className?: string }) {
               })
             }
             className={cn(
-              'uppercase transition-colors',
+              'tap-safe px-1 uppercase transition-colors',
               loc === current ? 'text-gold' : 'text-bone-dim hover:text-bone',
             )}
           >

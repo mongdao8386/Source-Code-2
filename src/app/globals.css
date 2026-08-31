@@ -105,6 +105,64 @@
   }
 }
 
+@layer utilities {
+  /* ── Safe areas ────────────────────────────────────────────────
+     With viewport-fit=cover the page draws under the Dynamic Island,
+     Android punch-holes and the home-indicator / gesture bar. Anything
+     pinned to an edge has to add the inset back or the system UI sits
+     on top of it. env() falls back to 0 on hardware without cutouts,
+     so these are safe to apply unconditionally.
+
+     Note the landscape case: rotating an iPhone puts the notch on one
+     side, which is why the horizontal insets matter too and why the
+     page gutter uses max() rather than a fixed value.
+     ──────────────────────────────────────────────────────────── */
+  .pad-safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .pad-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .inset-safe-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  /* Page gutter that never falls below the design value but grows to
+     clear a side notch in landscape. */
+  .gutter-safe {
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  }
+  @media (min-width: 640px) {
+    .gutter-safe {
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
+    }
+  }
+  @media (min-width: 1024px) {
+    .gutter-safe {
+      padding-left: max(3rem, env(safe-area-inset-left, 0px));
+      padding-right: max(3rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  /* Offset for content that must clear the fixed header, which is
+     itself pushed down by the top inset. */
+  .top-below-header {
+    top: calc(4rem + env(safe-area-inset-top, 0px));
+  }
+
+  /* Touch targets. Pointer-coarse devices need ~44px regardless of how
+     small the label is set. */
+  @media (pointer: coarse) {
+    .tap-safe {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+}
+
 @layer components {
   /* Hairline uppercase label — the counterweight to the display sizes. */
   .kicker {

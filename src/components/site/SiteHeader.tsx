@@ -38,13 +38,13 @@ export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-lux',
+        'pad-safe-top fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-lux',
         scrolled || open
           ? 'border-b border-line bg-ink/85 backdrop-blur-md'
           : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-[82rem] items-center justify-between px-5 sm:px-8 lg:px-12">
+      <div className="gutter-safe mx-auto flex h-16 w-full max-w-[82rem] items-center justify-between">
         <Link
           href="/"
           onClick={() => setOpen(false)}
@@ -95,25 +95,24 @@ export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
       {/* Full-screen mobile menu with oversized type. */}
       <div
         className={cn(
-          'fixed inset-0 top-16 bg-ink transition-all duration-500 ease-lux md:hidden',
+          'top-below-header fixed inset-x-0 bottom-0 bg-ink transition-all duration-500 ease-lux md:hidden',
           open ? 'visible opacity-100' : 'invisible opacity-0',
         )}
       >
-        <div className="flex h-full flex-col justify-between px-5 pb-12 pt-8">
+        <div className="gutter-safe flex h-full flex-col justify-between overflow-y-auto pt-8 pb-[calc(3rem+env(safe-area-inset-bottom,0px))]">
           <nav className="flex flex-col">
-            {links.map((l, i) => (
+            {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
                 className="border-b border-line py-5 font-display text-4xl text-bone"
-                style={{ transitionDelay: `${i * 60}ms` }}
               >
                 {t(l.key)}
               </Link>
             ))}
           </nav>
-          <div className="flex items-center justify-between">
+          <div className="mt-10 flex items-center justify-between">
             <LocaleSwitch />
             <BookingButton telegramUrl={telegramUrl} label={t('book')} />
           </div>
