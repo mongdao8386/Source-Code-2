@@ -49,7 +49,6 @@ export default async function HomePage({
   const heroImage = tField(settings.hero, 'image', locale);
   const headline = tField(settings.hero, 'headline', locale);
   const sub = tField(settings.hero, 'sub', locale);
-  const words = headline.split(' ');
   const lead = models[0];
 
   return (
@@ -77,13 +76,19 @@ export default async function HomePage({
             <p className="kicker text-gold">{tr('eyebrow')}</p>
           </Reveal>
 
-          <h1 className="mt-7 max-w-[14ch] text-mega leading-[0.86] tracking-[-0.045em] text-bone">
-            {words.map((w, i) => (
-              <Reveal as="span" key={i} variant="mask" delay={i * 90}>
-                {w}
-              </Reveal>
-            ))}
-          </h1>
+          {/* One mask for the whole headline. Masking per word would put each
+              word on its own line — .line-mask is display:block — which turned
+              a 7-word Vietnamese headline into a 7-line, 1000px-tall wall. */}
+          {/* The type styles must sit on the same element as max-w: `ch` is
+              relative to that element's own font-size, so a 15ch cap on an
+              unsized h1 resolves against 16px and shreds the headline. */}
+          <Reveal
+            as="h1"
+            variant="mask"
+            className="mt-7 max-w-[15ch] text-mega leading-[0.86] tracking-[-0.045em] text-bone"
+          >
+            {headline}
+          </Reveal>
 
           <div className="mt-10 flex flex-col gap-8 border-t border-line pt-8 md:flex-row md:items-end md:justify-between">
             <Reveal delay={200}>
