@@ -97,9 +97,30 @@ export async function signOutAction(formData: FormData): Promise<void> {
   redirect(`/${locale}/admin/login`);
 }
 
+/**
+ * The MFA actions below are reachable by any signed-in Supabase user, not just
+ * CMS staff. This site never signs visitors up, but a project with email signup
+ * still enabled would otherwise expose them — so gate on an active profile row.
+ */
+async function callerIsStaff(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from('profiles')
+    .select('is_active')
+    .eq('id', user.id)
+    .maybeSingle();
+  return !!data?.is_active;
+}
+
 /** Begin TOTP enrolment. Returns a QR data-URI + secret for the authenticator. */
 export async function enrollTotpAction(): Promise<ActionState> {
   const supabase = await createClient();
+  if (!(await callerIsStaff(supabase))) return { error: 'enroll_failed' };
 
   // Reuse an existing unverified factor rather than piling up new ones.
   const existing = await supabase.auth.mfa.listFactors();
@@ -152,6 +173,8 @@ export async function verifyTotpAction(
   if (!limited.ok) return { error: 'rate_limited' };
 
   const supabase = await createClient();
+  if (!(await callerIsStaff(supabase))) return { error: 'invalid_code' };
+
   const challenge = await supabase.auth.mfa.challenge({ factorId });
   if (challenge.error || !challenge.data) return { error: 'invalid_code' };
 
@@ -186,6 +209,8 @@ export async function verifyTotpAction(
 /** Lists the caller's factors so /admin/mfa can decide enrol vs. verify. */
 export async function listFactorsAction(): Promise<ActionState> {
   const supabase = await createClient();
+  if (!(await callerIsStaff(supabase))) return { error: 'list_failed' };
+
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error) return { error: 'list_failed' };
   const totp = (data?.totp ?? []).filter((f) => f.status === 'verified');

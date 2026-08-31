@@ -26,8 +26,14 @@ once they exist.
    SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
    npm run seed:owner
    ```
-4. Auth settings → enable **MFA (TOTP)**. Set **Site URL** to
-   `https://<your-domain>` and add it to redirect allow-list.
+4. Auth settings:
+   - Enable **MFA (TOTP)**.
+   - **Disable "Allow new users to sign up"** — this site has no visitor
+     accounts; only the owner creates staff. Leaving signup on lets strangers
+     create `auth.users` rows (they still cannot reach the CMS, but there is no
+     reason to allow it).
+   - Set **Site URL** to `https://<your-domain>` and add it to the redirect
+     allow-list.
 5. (Optional) Auth → SMTP: point at your provider so future email flows work.
 
 ## 2. VPS hardening
@@ -94,6 +100,8 @@ npx supabase db push   # if migrations changed
 - `https://<domain>/vi` and `/en` render.
 - `https://<domain>/vi/admin` → **404** (not a login page) when logged out.
 - Sign in as owner → forced TOTP enrol → dashboard.
-- Settings → set Telegram URL → a model profile's "Đặt lịch" opens it.
+- Settings → set Telegram URL → reload the home page → "Đặt lịch" is enabled and
+  opens that channel. (If it still reads "Sắp ra mắt", migration `0002` has not
+  been applied — the public settings view would be returning zero rows.)
 - `curl -sI https://<domain>` shows `strict-transport-security`,
   `content-security-policy`, `x-frame-options: DENY`.

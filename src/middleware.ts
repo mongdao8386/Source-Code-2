@@ -16,7 +16,7 @@ function firstSegment(sub: string | undefined): string {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { nonce, header: csp } = buildCsp();
+  const { header: csp } = buildCsp();
 
   // 1. Locale routing (may issue a redirect for a missing/!matching prefix).
   const intlResponse = intlMiddleware(request);
@@ -69,7 +69,6 @@ export async function middleware(request: NextRequest) {
   }
 
   intlResponse.headers.set('content-security-policy', csp);
-  intlResponse.headers.set('x-nonce', nonce);
   return intlResponse;
 }
 

@@ -1,14 +1,35 @@
 import { clientEnv } from '@/lib/env';
 
 /**
- * Builds a strict, nonce-based Content-Security-Policy for a single request.
- * The nonce is surfaced to the app via the `x-nonce` header so `next/script`
- * and inline bootstrap scripts can echo it.
+ * Content-Security-Policy for the app.
+ *
+ * Why no nonce / 'strict-dynamic':
+ *   Most public pages are prerendered at build time (SSG + ISR — see the
+ *   `revalidate` exports under app/[locale]/(site)). A nonce is per-request, so
+ *   it cannot be baked into HTML that was generated during `next build`; the
+ *   scripts would carry no nonce and 'strict-dynamic' would then block every
+ *   one of them, leaving the site rendered but completely inert. Next also
+ *   emits ~13 inline RSC-payload scripts per page whose hashes change with the
+ *   content, so hashing is not workable either.
+ *
+ *   'unsafe-inline' is therefore a deliberate trade for keeping pages static.
+ *   The injection surface it would protect is already closed by construction:
+ *   the app never calls dangerouslySetInnerHTML (ESLint `react/no-danger` is an
+ *   error), CMS markdown is rendered into React elements by components/site/
+ *   Prose.tsx rather than parsed into HTML, and every other value goes through
+ *   React's escaping. If a page ever needs to render raw HTML, revisit this.
+ *
+ * Everything else stays locked down: no framing, no plugins, no arbitrary
+ * origins — only self and the Supabase project.
  */
 export function buildCsp() {
-  const nonce = btoa(crypto.randomUUID());
-  const supabase = clientEnv.NEXT_PUBLIC_SUPABASE_URL;
   const isDev = process.env.NODE_ENV !== 'production';
+
+  // NEXT_PUBLIC_* is inlined at build time, so a container built without the
+  // real project URL would emit a CSP that blocks its own Supabase calls. Pair
+  // the configured origin with the managed-Supabase wildcard so the policy is
+  // correct either way.
+  const supabase = [clientEnv.NEXT_PUBLIC_SUPABASE_URL, 'https://*.supabase.co'];
 
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
@@ -16,19 +37,15 @@ export function buildCsp() {
     'form-action': ["'self'"],
     'frame-ancestors': ["'none'"],
     'object-src': ["'none'"],
-    'script-src': [
-      "'self'",
-      `'nonce-${nonce}'`,
-      "'strict-dynamic'",
-      ...(isDev ? ["'unsafe-eval'"] : []),
-    ],
+    'script-src': ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])],
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com'],
-    'img-src': ["'self'", 'data:', 'blob:', supabase],
-    'connect-src': ["'self'", supabase, ...(isDev ? ['ws:'] : [])],
-    'media-src': ["'self'", supabase],
+    'img-src': ["'self'", 'data:', 'blob:', ...supabase],
+    'connect-src': ["'self'", ...supabase, ...(isDev ? ['ws:'] : [])],
+    'media-src': ["'self'", ...supabase],
     'worker-src': ["'self'", 'blob:'],
     'manifest-src': ["'self'"],
+    'frame-src': ["'none'"],
     'upgrade-insecure-requests': [],
   };
 
@@ -36,5 +53,5 @@ export function buildCsp() {
     .map(([key, val]) => (val.length ? `${key} ${val.join(' ')}` : key))
     .join('; ');
 
-  return { nonce, header };
+  return { header };
 }

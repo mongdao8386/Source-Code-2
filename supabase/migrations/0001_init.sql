@@ -244,6 +244,9 @@ create trigger profiles_guard_role
 -- ============================================================================
 -- public read view for settings (no contact_email / phone exposure)
 -- ============================================================================
+-- NOTE: superseded by 0002_public_settings_view.sql, which switches this view
+-- to security_invoker = false. site_settings' only SELECT policy is staff-only,
+-- so an invoker-rights view returns nothing to anonymous visitors.
 create view public.public_site_settings
 with (security_invoker = true)
 as

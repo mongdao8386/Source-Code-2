@@ -25,8 +25,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const settings = await getSiteSettings();
-  const headline = tField(settings.hero, 'headline', locale) || 'Studio';
-  return { title: headline };
+  const headline = tField(settings.hero, 'headline', locale);
+  // Fall through to the layout's default title rather than rendering the
+  // template against a placeholder ("Studio · Studio").
+  return headline ? { title: headline } : {};
 }
 
 export default async function HomePage({
