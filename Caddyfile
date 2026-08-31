@@ -19,7 +19,7 @@
 
 	# Block the CMS from any external hint via the proxy as a belt-and-braces
 	# layer (the app already 404-cloaks non-staff).
-	@admin path /vi/admin* /en/admin*
+	@admin path {$ADMIN_PATH}*
 	header @admin X-Robots-Tag "noindex, nofollow"
 
 	reverse_proxy web:3000 {

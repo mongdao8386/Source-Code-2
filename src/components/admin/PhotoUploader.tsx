@@ -2,14 +2,14 @@
 
 import { useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter } from 'next/navigation';
 import type { ModelPhoto } from '@/lib/supabase/types';
 import { publicPhotoUrl } from '@/lib/storage';
 import {
   deletePhotoAction,
   reorderPhotosAction,
   setCoverAction,
-} from '@/app/[locale]/admin/(dash)/models/actions';
+} from '@/app/console/(dash)/models/actions';
 import { Button } from '@/components/ui/Button';
 
 export function PhotoUploader({
@@ -26,6 +26,20 @@ export function PhotoUploader({
   const [, start] = useTransition();
   const dragId = useRef<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Local state is optimistic, but `useState(initial)` ignores every later
+  // server render — so after a revalidation the tiles on screen can describe a
+  // list the database no longer has, and acting on a tile then hits a
+  // different photo than the one clicked. Re-sync whenever the server's actual
+  // contents change (identity alone is useless: the array is new every render).
+  const serverSignature = initial
+    .map((p) => `${p.id}:${p.sort_order}:${p.is_cover}`)
+    .join(',');
+  const [syncedSignature, setSyncedSignature] = useState(serverSignature);
+  if (syncedSignature !== serverSignature) {
+    setSyncedSignature(serverSignature);
+    setPhotos(initial);
+  }
 
   async function upload(files: FileList | null) {
     if (!files?.length) return;
@@ -55,23 +69,31 @@ export function PhotoUploader({
     const from = dragId.current;
     dragId.current = null;
     if (!from || from === targetId) return;
-    setPhotos((list) => {
-      const arr = [...list];
-      const fi = arr.findIndex((p) => p.id === from);
-      const ti = arr.findIndex((p) => p.id === targetId);
-      const [moved] = arr.splice(fi, 1);
-      arr.splice(ti, 0, moved!);
-      start(async () => {
-        await reorderPhotosAction({ modelId, order: arr.map((p) => p.id) });
-      });
-      return arr;
+
+    // Build the new order outside the updater. React may invoke a state
+    // updater more than once, and a server call made inside one fires once per
+    // invocation — a single drag was persisting several conflicting orders.
+    const arr = [...photos];
+    const fi = arr.findIndex((p) => p.id === from);
+    const ti = arr.findIndex((p) => p.id === targetId);
+    if (fi < 0 || ti < 0) return;
+    const [moved] = arr.splice(fi, 1);
+    arr.splice(ti, 0, moved!);
+
+    setPhotos(arr);
+    start(async () => {
+      const res = await reorderPhotosAction({ modelId, order: arr.map((p) => p.id) });
+      if (!res.ok) setErr(res.error);
+      router.refresh();
     });
   }
 
   function makeCover(photoId: string) {
     start(async () => {
-      await setCoverAction({ modelId, photoId });
+      const res = await setCoverAction({ modelId, photoId });
+      if (!res.ok) return setErr(res.error);
       setPhotos((list) => list.map((p) => ({ ...p, is_cover: p.id === photoId })));
+      router.refresh();
     });
   }
 
@@ -79,8 +101,9 @@ export function PhotoUploader({
     if (!confirm('Xoá ảnh này?')) return;
     start(async () => {
       const res = await deletePhotoAction({ photoId });
-      if (res.ok) setPhotos((list) => list.filter((p) => p.id !== photoId));
-      else setErr(res.error);
+      if (!res.ok) return setErr(res.error);
+      setPhotos((list) => list.filter((p) => p.id !== photoId));
+      router.refresh();
     });
   }
 

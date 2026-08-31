@@ -1,22 +1,15 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import type { Locale } from '@/i18n/routing';
 import { getSessionStaff } from '@/lib/auth/guards';
+import { adminHref } from '@/lib/admin-path';
 import { LoginForm } from './LoginForm';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLoginPage({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
+export default async function AdminLoginPage() {
   // Already fully authenticated → straight to the console.
   const staff = await getSessionStaff();
-  if (staff?.aal2) redirect(`/${locale}/admin`);
+  if (staff?.aal2) redirect(adminHref());
 
   const t = await getTranslations('admin');
 

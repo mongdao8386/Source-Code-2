@@ -1,17 +1,14 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
-import type { Locale } from '@/i18n/routing';
 import type { StaffRole } from '@/lib/supabase/types';
 import { signOutAction } from '@/lib/auth/actions';
 import { AdminNav } from './AdminNav';
 
 export async function AdminShell({
-  locale,
   role,
   email,
   children,
 }: {
-  locale: Locale;
   role: StaffRole;
   email: string;
   children: ReactNode;
@@ -42,7 +39,6 @@ export async function AdminShell({
         <div className="mt-auto border-t border-line px-5 py-4">
           <p className="truncate text-xs text-bone-dim">{email}</p>
           <form action={signOutAction} className="mt-2">
-            <input type="hidden" name="locale" value={locale} />
             <button className="text-xs uppercase tracking-[0.18em] text-bone-faint hover:text-bone">
               {t('signOut')}
             </button>
@@ -56,7 +52,6 @@ export async function AdminShell({
             STUDIO<span className="text-gold">.</span>
           </p>
           <form action={signOutAction}>
-            <input type="hidden" name="locale" value={locale} />
             <button className="text-xs uppercase tracking-[0.18em] text-bone-faint">
               {t('signOut')}
             </button>

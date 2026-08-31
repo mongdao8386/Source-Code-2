@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { useParams } from 'next/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { useRouter } from 'next/navigation';
+import { adminHref } from '@/lib/admin-path';
 import type { Category, Model } from '@/lib/supabase/types';
-import { createModelAction, updateModelAction, deleteModelAction } from '@/app/[locale]/admin/(dash)/models/actions';
+import { createModelAction, updateModelAction, deleteModelAction } from '@/app/console/(dash)/models/actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, Select, FormError } from '@/components/ui/Field';
 
@@ -30,8 +30,6 @@ export function ModelForm({
   model: Model | null;
   categories: Category[];
 }) {
-  const params = useParams();
-  const locale = (params.locale as 'vi' | 'en') ?? 'vi';
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +86,7 @@ export function ModelForm({
       }
       const id = (res.data as { id?: string })?.id;
       if (!model && id) {
-        router.replace({ pathname: '/admin/models/[id]', params: { id } });
+        router.replace(adminHref(`/models/${id}`));
       } else {
         router.refresh();
       }
@@ -99,14 +97,13 @@ export function ModelForm({
     if (!model || !confirm('Xoá người mẫu này? Không thể hoàn tác.')) return;
     start(async () => {
       const res = await deleteModelAction({ id: model.id });
-      if (res.ok) router.replace('/admin/models');
+      if (res.ok) router.replace(adminHref('/models'));
       else setError(res.error);
     });
   }
 
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-8">
-      <input type="hidden" value={locale} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="sn">Stage name</Label>

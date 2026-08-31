@@ -9,6 +9,7 @@ services:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
         NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-vi}
+        NEXT_PUBLIC_ADMIN_PATH: ${NEXT_PUBLIC_ADMIN_PATH:-/admin-cms}
     image: studio-booking-web:latest
     restart: unless-stopped
     env_file: .env
@@ -41,6 +42,7 @@ services:
       - '443:443'
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN}
+      ADMIN_PATH: ${NEXT_PUBLIC_ADMIN_PATH:-/admin-cms}
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

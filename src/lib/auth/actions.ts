@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { audit } from '@/lib/audit';
 import { loginLimiter } from '@/lib/ratelimit';
-import { defaultLocale, safeLocale } from '@/i18n/routing';
+import { adminHref } from '@/lib/admin-path';
 
 export type ActionState = { error?: string; ok?: boolean; data?: unknown };
 
@@ -21,7 +21,6 @@ function clientIp(h: Headers): string {
 const credsSchema = z.object({
   email: z.string().email().max(200),
   password: z.string().min(8).max(200),
-  locale: z.enum(['vi', 'en']).default(defaultLocale),
 });
 
 export async function signInAction(
@@ -31,10 +30,9 @@ export async function signInAction(
   const parsed = credsSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
-    locale: formData.get('locale'),
   });
   if (!parsed.success) return { error: 'invalid' };
-  const { email, password, locale } = parsed.data;
+  const { email, password } = parsed.data;
 
   const h = await headers();
   const ip = clientIp(h);
@@ -80,12 +78,11 @@ export async function signInAction(
     entityId: data.user.id,
   });
 
-  // aal1 now — middleware will route to /admin/mfa for the second factor.
-  redirect(`/${locale}/admin`);
+  // aal1 now — middleware will route to the MFA step for the second factor.
+  redirect(adminHref());
 }
 
-export async function signOutAction(formData: FormData): Promise<void> {
-  const locale = safeLocale(formData.get('locale'));
+export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -94,7 +91,7 @@ export async function signOutAction(formData: FormData): Promise<void> {
   if (user) {
     await audit({ actorId: user.id, action: 'auth.logout', entity: 'auth', entityId: user.id });
   }
-  redirect(`/${locale}/admin/login`);
+  redirect(adminHref('/login'));
 }
 
 /**
@@ -153,7 +150,6 @@ export async function enrollTotpAction(): Promise<ActionState> {
 const verifySchema = z.object({
   factorId: z.string().min(1),
   code: z.string().regex(/^\d{6}$/),
-  locale: z.enum(['vi', 'en']).default(defaultLocale),
 });
 
 export async function verifyTotpAction(
@@ -163,10 +159,9 @@ export async function verifyTotpAction(
   const parsed = verifySchema.safeParse({
     factorId: formData.get('factorId'),
     code: formData.get('code'),
-    locale: formData.get('locale'),
   });
   if (!parsed.success) return { error: 'invalid_code' };
-  const { factorId, code, locale } = parsed.data;
+  const { factorId, code } = parsed.data;
 
   const h = await headers();
   const limited = await loginLimiter(`mfa:${clientIp(h)}`);
@@ -203,7 +198,7 @@ export async function verifyTotpAction(
     entityId: user?.id,
   });
 
-  redirect(`/${locale}/admin`);
+  redirect(adminHref());
 }
 
 /** Lists the caller's factors so /admin/mfa can decide enrol vs. verify. */
