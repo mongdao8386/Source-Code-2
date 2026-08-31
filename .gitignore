@@ -48,3 +48,5 @@ yarn-error.log*
 
 # derived: regenerate with `npm run sql:bundle` (never commit — goes stale)
 supabase/applyall.sql
+# ad-hoc copies of migrations pasted into the SQL Editor
+supabase/migration*.sql
