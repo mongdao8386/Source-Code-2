@@ -56,6 +56,9 @@ export type Model = {
   created_by: string | null;
   updated_by: string | null;
   published_at: string | null;
+  video_path: string;
+  video_poster_path: string;
+  video_duration: number | null;
 } & Timestamps;
 
 export type ModelPhoto = {
@@ -206,6 +209,9 @@ export type Database = {
           | 'height_cm'
           | 'city'
           | 'experience_years'
+          | 'video_path'
+          | 'video_poster_path'
+          | 'video_duration'
         >,
         Partial<Model>
       >;

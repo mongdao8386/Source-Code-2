@@ -25,6 +25,7 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY \
     NEXT_PUBLIC_DEFAULT_LOCALE=$NEXT_PUBLIC_DEFAULT_LOCALE \
     NEXT_PUBLIC_ADMIN_PATH=$NEXT_PUBLIC_ADMIN_PATH
+# prebuild copies the ffmpeg.wasm core into public/ (gitignored, ~32 MB)
 RUN npm run build
 
 # ── runner ─────────────────────────────────────────────────────

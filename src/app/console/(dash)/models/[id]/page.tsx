@@ -4,6 +4,7 @@ import { CMS_LOCALE } from '@/lib/admin-path';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ModelForm } from '@/components/admin/ModelForm';
 import { PhotoUploader } from '@/components/admin/PhotoUploader';
+import { VideoTrimmer } from '@/components/admin/VideoTrimmer';
 import { getModelForEdit, listCategories } from '@/lib/queries/admin';
 
 export const dynamic = 'force-dynamic';
@@ -36,6 +37,16 @@ export default async function EditModelPage({
       <section className="mb-12">
         <h2 className="kicker mb-4">Photos</h2>
         <PhotoUploader modelId={model.id} photos={model.photos} />
+      </section>
+
+      <section className="mb-12">
+        <h2 className="kicker mb-4">Video giới thiệu</h2>
+        <VideoTrimmer
+          modelId={model.id}
+          videoPath={model.video_path}
+          posterPath={model.video_poster_path}
+          duration={model.video_duration}
+        />
       </section>
 
       <section>

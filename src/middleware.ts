@@ -23,7 +23,11 @@ function notFound(csp: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { header: csp } = buildCsp();
+  const isAdminArea =
+    pathname === ADMIN_PATH ||
+    pathname.startsWith(`${ADMIN_PATH}/`) ||
+    pathname.startsWith(ADMIN_INTERNAL);
+  const { header: csp } = buildCsp({ allowWasm: isAdminArea });
 
   // The CMS lives under /console but is only ever served through ADMIN_PATH.
   // Refuse the internal path so it cannot be used to skip the rename.

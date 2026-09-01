@@ -53,3 +53,6 @@ supabase/migration*.sql
 
 # ad-hoc copies pasted into the SQL Editor
 supabase/SCHEMA*.sql
+
+# ffmpeg.wasm core — copied from node_modules by scripts/copy-ffmpeg.mjs
+/public/ffmpeg

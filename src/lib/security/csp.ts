@@ -22,7 +22,7 @@ import { clientEnv } from '@/lib/env';
  * Everything else stays locked down: no framing, no plugins, no arbitrary
  * origins — only self and the Supabase project.
  */
-export function buildCsp() {
+export function buildCsp({ allowWasm = false }: { allowWasm?: boolean } = {}) {
   const isDev = process.env.NODE_ENV !== 'production';
 
   // NEXT_PUBLIC_* is inlined at build time, so a container built without the
@@ -37,12 +37,21 @@ export function buildCsp() {
     'form-action': ["'self'"],
     'frame-ancestors': ["'none'"],
     'object-src': ["'none'"],
-    'script-src': ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    // 'wasm-unsafe-eval' and blob: are only granted on the CMS, which runs
+    // ffmpeg.wasm to trim video in the browser: the library instantiates
+    // WebAssembly and spawns its worker from a blob URL. The public site never
+    // needs either, so it keeps the tighter policy.
+    'script-src': [
+      "'self'",
+      "'unsafe-inline'",
+      ...(allowWasm ? ["'wasm-unsafe-eval'", 'blob:'] : []),
+      ...(isDev ? ["'unsafe-eval'"] : []),
+    ],
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com'],
     'img-src': ["'self'", 'data:', 'blob:', ...supabase],
     'connect-src': ["'self'", ...supabase, ...(isDev ? ['ws:'] : [])],
-    'media-src': ["'self'", ...supabase],
+    'media-src': ["'self'", 'blob:', ...supabase],
     'worker-src': ["'self'", 'blob:'],
     'manifest-src': ["'self'"],
     'frame-src': ["'none'"],

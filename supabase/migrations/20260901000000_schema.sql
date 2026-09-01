@@ -173,6 +173,14 @@ create index if not exists click_events_created_at_idx on public.click_events (c
 -- Columns added after the first release; listed separately so this file also
 -- upgrades a database created from an older version.
 alter table public.audit_logs    add column if not exists actor_email   text;
+
+-- One short intro clip per model. Kept on the row rather than in its own table
+-- because the cap is a single 15s reel, not a gallery. Duration is recorded for
+-- display only — it is reported by the browser that did the trim, so the real
+-- guard is the byte cap enforced server-side on upload.
+alter table public.models add column if not exists video_path        text not null default '';
+alter table public.models add column if not exists video_poster_path text not null default '';
+alter table public.models add column if not exists video_duration    numeric;
 alter table public.site_settings add column if not exists brand_name    text not null default 'STUDIO';
 alter table public.site_settings add column if not exists logo_path     text not null default '';
 alter table public.site_settings add column if not exists favicon_path  text not null default '';

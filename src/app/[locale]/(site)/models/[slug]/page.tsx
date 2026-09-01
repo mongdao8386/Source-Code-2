@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
 import { Container } from '@/components/ui/Container';
 import { Gallery } from '@/components/site/Gallery';
+import { ModelVideo } from '@/components/site/ModelVideo';
 import { BookingButton } from '@/components/site/BookingButton';
 import { getModelBySlug, getPublishedModels, getSiteSettings } from '@/lib/queries/public';
 import { t, tField } from '@/lib/i18n-text';
@@ -80,6 +81,13 @@ export default async function ModelDetailPage({
         </div>
 
         <aside className="order-1 lg:order-2 lg:sticky lg:top-24 lg:h-fit">
+          <ModelVideo
+            videoPath={model.video_path}
+            posterPath={model.video_poster_path}
+            name={model.stage_name}
+            label={tr('showreel')}
+          />
+
           <dl className="border-t border-line">
             {spec.map(([k, v]) => (
               <div key={k} className="flex items-baseline justify-between gap-4 border-b border-line py-3">

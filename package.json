@@ -19,9 +19,14 @@
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
     "seed:owner": "tsx scripts/seed-owner.ts",
-    "sql:bundle": "node scripts/bundle-sql.mjs"
+    "sql:bundle": "node scripts/bundle-sql.mjs",
+    "ffmpeg:copy": "node scripts/copy-ffmpeg.mjs",
+    "prebuild": "node scripts/copy-ffmpeg.mjs",
+    "predev": "node scripts/copy-ffmpeg.mjs"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@hookform/resolvers": "^3.9.0",
     "@supabase/ssr": "0.5.2",
     "@supabase/supabase-js": "2.45.4",
@@ -43,6 +48,7 @@
     }
   },
   "devDependencies": {
+    "@ffmpeg/core": "^0.12.10",
     "@playwright/test": "^1.47.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20.16.0",

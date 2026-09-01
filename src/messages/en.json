@@ -30,7 +30,8 @@
     "experience": "Experience",
     "years": "yrs",
     "measurements": "Measurements",
-    "city": "Area"
+    "city": "Area",
+    "showreel": "Showreel"
   },
   "booking": {
     "cta": "Book",
