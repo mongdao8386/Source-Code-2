@@ -46,13 +46,8 @@ yarn-error.log*
 /supabase/.branches
 /supabase/.temp
 
-# derived: regenerate with `npm run sql:bundle` (never commit — goes stale)
-supabase/applyall.sql
-# ad-hoc copies of migrations pasted into the SQL Editor
-supabase/migration*.sql
-
-# ad-hoc copies pasted into the SQL Editor
-supabase/SCHEMA*.sql
-
 # ffmpeg.wasm core — copied from node_modules by scripts/copy-ffmpeg.mjs
 /public/ffmpeg
+
+# stray hand-saved copies of the schema — supabase/migrations/ is the only source
+supabase/*.sql

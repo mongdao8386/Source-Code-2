@@ -31,8 +31,7 @@ opens a shared Telegram channel. A self-hosted CMS manages everything.
 ```bash
 npm install
 cp .env.example .env         # fill Supabase URL + anon + service_role keys
-npx supabase db push         # apply migrations to your project
-psql "$SUPABASE_DB_URL" -f supabase/seed.sql
+npx supabase db push         # applies supabase/migrations/ (schema + starter data)
 npm run seed:owner           # create the owner (see deploy/README.md for vars)
 npm run dev                  # http://localhost:3000  → redirects to /vi
 ```
@@ -61,8 +60,8 @@ src/
                            · testimonials · settings · users(owner) · audit
   app/api/
     health · track/booking · admin/photos
-supabase/migrations/       schema + RLS + triggers + storage (timestamped)
-supabase/seed.sql          settings singleton + starter categories + page stubs
+supabase/migrations/       one idempotent file: schema, RLS, triggers, storage,
+                           column grants and starter data
 deploy/                     VPS runbook + pg_dump backup
 ```
 

@@ -1,14 +1,17 @@
 -- ============================================================================
--- 20260901000000_schema.sql — the whole schema, in one file.
+-- 20260901000000_schema.sql — the whole database, in one file.
 --
 -- Squashes what used to be five migrations (init, public settings view,
 -- deletable staff, settings column grants, branding). Applying them one at a
 -- time left the database in a half-state more than once, so this is now the
 -- single source of truth for a deploy.
 --
+-- Schema and starter data both live here so a deploy is a single paste.
+--
 -- Written to be idempotent: safe on an empty project and safe to re-run on a
--- database that already has some or all of it. Existing rows are never
--- touched — the only inserts live in seed.sql.
+-- database that already has some or all of it. Every insert is guarded by
+-- ON CONFLICT DO NOTHING, so re-running never overwrites content you have
+-- since edited in the CMS.
 --
 -- Bilingual text is jsonb: { "vi": "...", "en": "..." }
 -- ============================================================================
@@ -508,3 +511,51 @@ create policy "staff all private bucket"
   on storage.objects for all to authenticated
   using (bucket_id = 'models-private' and public.is_staff())
   with check (bucket_id = 'models-private' and public.is_staff());
+
+-- ============================================================================
+-- Starter data
+--
+-- The owner account is deliberately not here: it needs an auth.users row, which
+-- only the service role can create. Run `npm run seed:owner` for that.
+-- ============================================================================
+
+insert into public.site_settings (id, hero, announcement)
+values (
+  true,
+  jsonb_build_object(
+    'headline', jsonb_build_object('vi', 'Gương mặt cho khung hình của bạn', 'en', 'Faces for your frame'),
+    'sub', jsonb_build_object(
+      'vi', 'Tuyển chọn người mẫu chụp ảnh chuyên nghiệp.',
+      'en', 'A curated roster of photographic models.'
+    ),
+    'image', ''
+  ),
+  jsonb_build_object('enabled', false, 'text', jsonb_build_object('vi', '', 'en', ''))
+)
+on conflict (id) do nothing;
+
+insert into public.categories (slug, name, sort_order) values
+  ('thoi-trang', jsonb_build_object('vi', 'Thời trang', 'en', 'Fashion'), 1),
+  ('beauty',     jsonb_build_object('vi', 'Beauty',     'en', 'Beauty'),  2),
+  ('ky-yeu',     jsonb_build_object('vi', 'Kỷ yếu',     'en', 'Yearbook'), 3),
+  ('su-kien',    jsonb_build_object('vi', 'Sự kiện',    'en', 'Events'),  4),
+  ('thuong-mai', jsonb_build_object('vi', 'Thương mại', 'en', 'Commercial'), 5)
+on conflict (slug) do nothing;
+
+-- Published on purpose: the header and footer always link to these three, so
+-- shipping them as drafts would leave a fresh install 404-ing its own nav.
+-- Replace the placeholder copy from the CMS (Trang nội dung).
+insert into public.pages (slug, title, body, status) values
+  ('about',
+   jsonb_build_object('vi', 'Về chúng tôi', 'en', 'About us'),
+   jsonb_build_object('vi', E'## Về chúng tôi\n\nNội dung đang được cập nhật.', 'en', E'## About us\n\nContent coming soon.'),
+   'published'),
+  ('terms',
+   jsonb_build_object('vi', 'Điều khoản', 'en', 'Terms'),
+   jsonb_build_object('vi', E'## Điều khoản sử dụng\n\nNội dung đang được cập nhật.', 'en', E'## Terms of use\n\nContent coming soon.'),
+   'published'),
+  ('guide',
+   jsonb_build_object('vi', 'Hướng dẫn', 'en', 'Guide'),
+   jsonb_build_object('vi', E'## Hướng dẫn đặt lịch\n\n1. Chọn người mẫu.\n2. Nhấn **Đặt lịch**.\n3. Trao đổi chi tiết qua Telegram.', 'en', E'## How to book\n\n1. Pick a model.\n2. Tap **Book**.\n3. Sort out the details on Telegram.'),
+   'published')
+on conflict (slug) do nothing;

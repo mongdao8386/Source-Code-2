@@ -15,8 +15,7 @@ once they exist.
 2. Apply the schema from your machine:
    ```bash
    npx supabase link --project-ref <ref>
-   npx supabase db push          # runs supabase/migrations/*
-   psql "$SUPABASE_DB_URL" -f supabase/seed.sql
+   npx supabase db push          # runs supabase/migrations/ (schema + starter data)
    ```
 3. Create the owner (needs service_role key):
    ```bash
