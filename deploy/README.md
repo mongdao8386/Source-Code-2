@@ -15,6 +15,12 @@ The firewall accepts **22, 80, 443 and ICMP** and drops everything else. Add a
 rule before exposing any new port; Hostinger firewalls are default-deny, so a
 service on an unlisted port simply will not answer.
 
+> Editing rules does not push them to a running VM: the group sits at
+> `is_synced: false` until you hit *Synchronize* in hPanel (API: `POST
+> /vps/v1/firewall/354395/sync/1946746`). It is synced as of 2026-09-01 — but
+> after every rule change, check that before blaming Caddy for a connection
+> that hangs on 443.
+
 ---
 
 ## 1. Supabase
@@ -134,8 +140,8 @@ curl -sI https://your-domain.tld | grep -i 'strict-transport\|content-security'
 
 ## 5. Auto-deploy
 
-`.github/workflows/deploy.yml` typechecks, lints and builds on every push to
-`main`, then SSHes in and rebuilds. Add four repository secrets under
+`.github/workflows/deploy.yml` typechecks and lints on every push to `main`,
+then SSHes in and rebuilds. Add four repository secrets under
 **Settings → Secrets and variables → Actions**:
 
 | Secret | Value |
@@ -158,6 +164,25 @@ The workflow refuses to deploy if the working tree on the VPS is dirty, so edit
 code locally and push rather than on the server. The old container keeps serving
 while the new image builds; it swaps only after the build succeeds, and the job
 fails loudly (with logs) if the health check never turns green.
+
+**CI does not run `next build`.** It used to, against a placeholder Supabase
+hostname that does not resolve — and since every page here prerenders from the
+database, that build failed on every push, which meant the deploy job (it
+`needs: check`) never ran at all. Types and lint are checked in CI; the build
+that has to succeed is the one on the VPS, which has the real credentials and
+is already gated by the health check. If you want the build checked in CI too,
+add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as secrets
+and restore the step — the workflow comment says how.
+
+The three things that must be true before the first push deploys anything:
+
+1. The four secrets above exist.
+2. `/opt/studio` on the VPS is a clone of this repo with `.env` filled in
+   (section 4), and `git -C /opt/studio status` is clean.
+3. `deploy` is in the `docker` group — `ssh deploy@187.53.132.36 docker ps`
+   answers without `sudo`.
+
+Then push to `main`, or hit **Run workflow** on the Actions tab, and watch it.
 
 ### Deploying by hand
 

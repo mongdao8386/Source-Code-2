@@ -13,8 +13,17 @@ import { t, tField } from '@/lib/i18n-text';
 import { clientEnv } from '@/lib/env';
 
 export async function generateStaticParams() {
-  const models = await getPublishedModels();
-  return models.map((m) => ({ slug: m.slug }));
+  try {
+    const models = await getPublishedModels();
+    return models.map((m) => ({ slug: m.slug }));
+  } catch {
+    // Wherever the database is reachable this branch never runs and the whole
+    // catalogue is prerendered. When it is not — a Supabase blip while the VPS
+    // builds the image, or a build with placeholder credentials — fall back to
+    // rendering these pages on demand instead of failing the deploy outright.
+    // `revalidate` above still governs them once they exist.
+    return [];
+  }
 }
 
 export async function generateMetadata({

@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check:
-    name: Typecheck, lint, build
+    name: Typecheck and lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +29,24 @@ jobs:
 
       - run: npm run lint
 
-      # Placeholder public values: this job only proves the code compiles.
-      # The real values are baked in when the VPS builds the image.
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SITE_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key-placeholder
-          NEXT_PUBLIC_ADMIN_PATH: /admin-cms
+      # `npm run build` deliberately does NOT run here.
+      #
+      # It used to, against a placeholder Supabase URL. That hostname does not
+      # resolve, and this site prerenders from the database — every page reads
+      # site_settings, the model route reads the catalogue — so the build died
+      # in "Collecting page data" on every push. This job failed, `deploy`
+      # needs it, and so nothing was ever deployed.
+      #
+      # Compilation and types are covered by the two steps above. The build
+      # that actually has to succeed is the one on the VPS: it has the real
+      # credentials, it runs while the old container keeps serving, and the
+      # deploy step below fails loudly and leaves that old container in place
+      # if it breaks. That is the honest gate.
+      #
+      # To check the build here as well, add NEXT_PUBLIC_SUPABASE_URL and
+      # NEXT_PUBLIC_SUPABASE_ANON_KEY as repository secrets and restore this
+      # step using them. The anon key is public by design — RLS is what
+      # protects the data — but it does tie CI to Supabase being reachable.
 
   deploy:
     name: Deploy to VPS
