@@ -1,107 +1,193 @@
-# Deployment — Hostinger VPS + Supabase
+# Deploy — Hostinger VPS + Supabase
 
-VPS IP and domain will be filled in later. Everything below is ready to run
-once they exist.
+## The box
 
-## 0. Prerequisites
+| | |
+|---|---|
+| Host | `srv1946746.hstgr.cloud` |
+| IPv4 | `187.53.132.36` |
+| IPv6 | `2a02:4780:5e:3c9a::1` |
+| Plan | KVM 2 — 2 vCPU, 8 GB RAM, 100 GB NVMe, 8 TB transfer |
+| OS | Ubuntu 26.04 LTS |
+| Firewall | `studio-web` (id 354395) — attached |
 
-- A Supabase project (free tier is fine to start).
-- A Hostinger VPS (Ubuntu 22.04/24.04) and a domain managed in Hostinger DNS.
+The firewall accepts **22, 80, 443 and ICMP** and drops everything else. Add a
+rule before exposing any new port; Hostinger firewalls are default-deny, so a
+service on an unlisted port simply will not answer.
+
+---
 
 ## 1. Supabase
 
-1. Create the project. Note **Project URL**, **anon key**, **service_role key**
-   (Settings → API) and the **connection string** (Settings → Database).
-2. Apply the schema from your machine:
-   ```bash
-   npx supabase link --project-ref <ref>
-   npx supabase db push          # runs supabase/migrations/ (schema + starter data)
-   ```
-3. Create the owner (needs service_role key):
-   ```bash
-   OWNER_EMAIL=you@example.com OWNER_INITIAL_PASSWORD='a-long-random-string' \
-   OWNER_FULL_NAME='Your Name' \
-   NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
-   SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
-   npm run seed:owner
-   ```
-4. Auth settings:
-   - Enable **MFA (TOTP)**.
-   - **Disable "Allow new users to sign up"** — this site has no visitor
-     accounts; only the owner creates staff. Leaving signup on lets strangers
-     create `auth.users` rows (they still cannot reach the CMS, but there is no
-     reason to allow it).
-   - Set **Site URL** to `https://<your-domain>` and add it to the redirect
-     allow-list.
-5. (Optional) Auth → SMTP: point at your provider so future email flows work.
+Everything is in one file. Open the SQL Editor and run:
 
-## 2. VPS hardening
+```
+supabase/migrations/20260901000000_schema.sql
+```
+
+It is idempotent — schema, RLS, triggers, storage buckets, column grants and
+starter data — so it is safe on an empty project and safe to re-run. Then
+create the single owner account, which needs the service-role key because it
+has to write an `auth.users` row:
 
 ```bash
-adduser deploy && usermod -aG sudo deploy
-# copy your SSH key to /home/deploy/.ssh/authorized_keys
+OWNER_EMAIL=you@example.com \
+OWNER_INITIAL_PASSWORD='a-long-random-string' \
+OWNER_FULL_NAME='Your Name' \
+NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
+npm run seed:owner
+```
+
+In the Supabase dashboard: enable **MFA (TOTP)**, set **Site URL** to your
+domain, and **turn off email signups** — the public site has no user accounts,
+so any signup that exists is only an attack surface.
+
+## 2. DNS
+
+Point the domain at the VPS. Two records:
+
+| Type | Name | Value | TTL |
+|---|---|---|---|
+| A | `@` | `187.53.132.36` | 300 |
+| A | `www` | `187.53.132.36` | 300 |
+
+Wait for it to resolve before starting the stack — Caddy asks Let's Encrypt for
+a certificate on first boot, and that fails if the name does not yet point here:
+
+```bash
+dig +short your-domain.tld     # must print 187.53.132.36
+```
+
+## 3. Prepare the server
+
+SSH in as root the first time, then work as `deploy`:
+
+```bash
+adduser --disabled-password --gecos "" deploy
+usermod -aG sudo deploy
+install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
+cp ~/.ssh/authorized_keys /home/deploy/.ssh/
+chown deploy:deploy /home/deploy/.ssh/authorized_keys
+
+# Password logins off, root logins off
 sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 systemctl restart ssh
 
-ufw default deny incoming && ufw default allow outgoing
-ufw allow OpenSSH && ufw allow 80 && ufw allow 443 && ufw enable
 apt-get update && apt-get install -y fail2ban
-
-# Docker
 curl -fsSL https://get.docker.com | sh
 usermod -aG docker deploy
 ```
 
-## 3. DNS (Hostinger)
+The Hostinger firewall already covers the network; `ufw` on top of it is
+optional and easy to get wrong, so it is left out.
 
-In hPanel → Domains → DNS Zone:
+## 4. First deploy
 
-| Type | Name | Value            | TTL |
-|------|------|------------------|-----|
-| A    | @    | `<VPS_IP>`       | 300 |
-| A    | www  | `<VPS_IP>`       | 300 |
-
-Wait for propagation (`dig +short <domain>` returns the VPS IP).
-
-## 4. App
+As `deploy`:
 
 ```bash
-sudo mkdir -p /opt/studio && sudo chown deploy: /opt/studio
+sudo install -d -o deploy -g deploy /opt/studio
+git clone https://github.com/mongdao8386/Source-Code-2.git /opt/studio
 cd /opt/studio
-git clone <repo> .
 cp .env.example .env
-$EDITOR .env          # fill Supabase keys, SITE_DOMAIN, ACME_EMAIL, REDIS_URL=redis://redis:6379
-
-docker compose up -d --build
-docker compose logs -f caddy     # watch the certificate get issued
+nano .env
 ```
 
-Health: `curl -fsS https://<domain>/api/health` → `{"status":"ok"}`.
+Fill in `.env`. The values that matter:
 
-## 5. Backups
+| Key | Note |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | `https://your-domain.tld`, no trailing slash |
+| `SITE_DOMAIN` | the bare domain — Caddy requests the certificate for it |
+| `ACME_EMAIL` | Let's Encrypt notifications |
+| `NEXT_PUBLIC_ADMIN_PATH` | the CMS path, e.g. `/quan-tri-x7k2` |
+| `NEXT_PUBLIC_SUPABASE_URL` / `ANON_KEY` | from Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | server-only, never reaches the browser |
+| `REDIS_URL` | `redis://redis:6379` |
+
+Then:
 
 ```bash
-cp deploy/backup.sh /opt/studio/deploy/ && chmod +x /opt/studio/deploy/backup.sh
-crontab -e
-# 15 3 * * *  SUPABASE_DB_URL='...' /opt/studio/deploy/backup.sh >> /var/log/studio-backup.log 2>&1
+docker compose up -d --build      # first build takes a few minutes on 2 vCPU
+docker compose logs -f caddy      # watch the certificate get issued
 ```
 
-## 6. Updates
+Check it:
+
+```bash
+curl -fsS https://your-domain.tld/api/health      # {"status":"ok"}
+curl -sI https://your-domain.tld | grep -i 'strict-transport\|content-security'
+```
+
+> **`NEXT_PUBLIC_*` is compiled into the bundle, not read at runtime.** Changing
+> any of them — the admin path especially — means `docker compose up -d --build`
+> again. Editing `.env` alone changes nothing for those keys.
+
+## 5. Auto-deploy
+
+`.github/workflows/deploy.yml` typechecks, lints and builds on every push to
+`main`, then SSHes in and rebuilds. Add four repository secrets under
+**Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+|---|---|
+| `VPS_HOST` | `187.53.132.36` |
+| `VPS_USER` | `deploy` |
+| `VPS_SSH_KEY` | a **private** key whose public half is in `/home/deploy/.ssh/authorized_keys` |
+| `VPS_PORT` | `22` (optional) |
+
+Generate a key used only by CI, so it can be revoked without touching your own:
+
+```bash
+ssh-keygen -t ed25519 -f deploy_key -N "" -C "github-actions"
+# public half onto the server:
+ssh-copy-id -i deploy_key.pub deploy@187.53.132.36
+# private half into the VPS_SSH_KEY secret, then delete both local copies
+```
+
+The workflow refuses to deploy if the working tree on the VPS is dirty, so edit
+code locally and push rather than on the server. The old container keeps serving
+while the new image builds; it swaps only after the build succeeds, and the job
+fails loudly (with logs) if the health check never turns green.
+
+### Deploying by hand
 
 ```bash
 cd /opt/studio && git pull && docker compose up -d --build
-npx supabase db push   # if migrations changed
 ```
 
-## Smoke test (run after every deploy)
+## 6. Backups
 
-- `https://<domain>/vi` and `/en` render.
-- `https://<domain>/vi/admin` → **404** (not a login page) when logged out.
-- Sign in as owner → forced TOTP enrol → dashboard.
-- Settings → set Telegram URL → reload the home page → "Đặt lịch" is enabled and
-  opens that channel. (If it still reads "Sắp ra mắt", the
-  `public_site_settings` migration has not been applied — that view would be
-  returning zero rows.)
-- `curl -sI https://<domain>` shows `strict-transport-security`,
-  `content-security-policy`, `x-frame-options: DENY`.
+Supabase keeps 7 days of its own. This is a second copy you control:
+
+```bash
+sudo install -d -o deploy -g deploy /opt/studio/backups
+crontab -e
+# 15 3 * * * SUPABASE_DB_URL='...' /opt/studio/deploy/backup.sh >> /var/log/studio-backup.log 2>&1
+```
+
+Storage objects (photos, video, brand assets) live in Supabase Storage and are
+**not** covered by `pg_dump` — only the rows that reference them are.
+
+## Smoke test after every deploy
+
+- `https://your-domain.tld/vi` and `/en` render.
+- `https://your-domain.tld/<admin-path>` → sign-in; any other path under it
+  returns **404** while signed out, and `/console` returns 404 always.
+- Sign in as owner → TOTP is demanded → dashboard.
+- Settings → Telegram URL saved → the home page button opens that channel.
+- A published model appears on `/vi/nguoi-mau`; flipping it to draft removes it.
+- `curl -sI` shows `strict-transport-security` and `content-security-policy`.
+
+## Notes on this hardware
+
+Two vCPU is the constraint worth remembering:
+
+- The image build is the heaviest thing that happens. It runs while the old
+  container still serves, so the site stays up but feels slower for a few
+  minutes. Avoid deploying during a traffic peak.
+- Video is trimmed in the browser, never on the server, for the same reason.
+- Video and images are served from Supabase Storage, so they bill against the
+  project's **250 GB egress**, not the VPS's 8 TB. That is the limit to watch.
