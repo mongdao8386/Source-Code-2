@@ -184,6 +184,22 @@ alter table public.audit_logs    add column if not exists actor_email   text;
 alter table public.models add column if not exists video_path        text not null default '';
 alter table public.models add column if not exists video_poster_path text not null default '';
 alter table public.models add column if not exists video_duration    numeric;
+
+-- Free-form rows appended to the spec list on a model page, so a fact the
+-- built-in columns do not cover ("Cân nặng", "Ngôn ngữ", "Tattoo"…) can be
+-- added from the CMS instead of by migration. An ordered array — the CMS order
+-- is the display order — of
+--   { "label": { "vi": …, "en": … }, "value": { "vi": …, "en": … } }
+-- Shape beyond "it is an array" is enforced by Zod on write and tolerated
+-- defensively on read: a CHECK constraint cannot contain the subquery that
+-- walking the elements would need.
+alter table public.models add column if not exists details jsonb not null default '[]'::jsonb;
+
+alter table public.models drop constraint if exists models_details_shape;
+alter table public.models
+  add constraint models_details_shape
+  check (jsonb_typeof(details) = 'array' and jsonb_array_length(details) <= 30);
+
 alter table public.site_settings add column if not exists brand_name    text not null default 'STUDIO';
 alter table public.site_settings add column if not exists logo_path     text not null default '';
 alter table public.site_settings add column if not exists favicon_path  text not null default '';

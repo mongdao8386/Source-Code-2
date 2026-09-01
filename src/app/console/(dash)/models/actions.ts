@@ -16,6 +16,31 @@ const measurements = z
   })
   .default({});
 
+/**
+ * A short bilingual bag for the free-form detail rows. Deliberately not
+ * `i18nString` — that allows 20k characters, which is a body of prose, not a
+ * value meant to sit on one line of a spec list.
+ */
+const shortText = z
+  .object({
+    vi: z.string().trim().max(120).optional(),
+    en: z.string().trim().max(120).optional(),
+  })
+  .default({});
+
+const details = z
+  .array(z.object({ label: shortText, value: shortText }))
+  .max(30)
+  .default([])
+  // A row with an empty half would render as a spec line missing its label or
+  // its value. Dropping those here means a half-typed row costs nothing: the
+  // CMS never has to tidy up after itself before saving.
+  .transform((rows) =>
+    rows.filter(
+      (r) => (r.label.vi || r.label.en) && (r.value.vi || r.value.en),
+    ),
+  );
+
 const baseFields = {
   slug: slugSchema,
   stage_name: z.string().trim().min(1).max(120),
@@ -25,6 +50,7 @@ const baseFields = {
   experience_years: z.coerce.number().int().min(0).max(60).nullable().default(null),
   bio: i18nString,
   measurements,
+  details,
   category_ids: z.array(z.string().uuid()).max(20).default([]),
   display_order: z.coerce.number().int().min(0).max(9999).default(0),
   seo: z

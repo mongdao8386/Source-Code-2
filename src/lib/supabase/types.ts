@@ -39,6 +39,12 @@ export type Category = {
   sort_order: number;
 } & Timestamps;
 
+/**
+ * One free-form row in a model's detail list, added from the CMS. Both halves
+ * are bilingual so the label reads as well in EN as the value does.
+ */
+export type ModelDetail = { label: I18nText; value: I18nText };
+
 export type Model = {
   id: string;
   slug: string;
@@ -59,6 +65,7 @@ export type Model = {
   video_path: string;
   video_poster_path: string;
   video_duration: number | null;
+  details: ModelDetail[];
 } & Timestamps;
 
 export type ModelPhoto = {
@@ -212,6 +219,7 @@ export type Database = {
           | 'video_path'
           | 'video_poster_path'
           | 'video_duration'
+          | 'details'
         >,
         Partial<Model>
       >;

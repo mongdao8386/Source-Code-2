@@ -22,6 +22,7 @@ opens a shared Telegram channel. A self-hosted CMS manages everything.
 | Row access | RLS on every table; public reads limited to published rows; a `public_site_settings` view hides contact fields |
 | Mutations | every CMS write: role check → Zod → RLS-scoped query → audit row |
 | Uploads | magic-byte sniff → `sharp` auto-orient (EXIF stripped) → WebP re-encode → size cap |
+| Free-form CMS fields | `models.details` is jsonb, but every row is Zod-checked on write and re-checked on read — a label is never trusted to be a string |
 | Headers | nonce CSP + HSTS + `X-Frame-Options: DENY` (middleware + Caddy) |
 | Brute force | Redis/in-memory fixed-window limiter on login + MFA |
 | Secrets | `service_role` key server-only (`src/lib/supabase/admin.ts`), never bundled |

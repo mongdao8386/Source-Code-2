@@ -43,6 +43,13 @@ In the Supabase dashboard: enable **MFA (TOTP)**, set **Site URL** to your
 domain, and **turn off email signups** — the public site has no user accounts,
 so any signup that exists is only an attack surface.
 
+**When the schema changes later**, the update path is the same paste: pull, open
+the same file, run it again. Every statement is `if not exists` / `drop … create`
+/ `on conflict do nothing`, so it adds what is new and leaves your content
+alone. Do it *before* the deploy that needs it — the app queries `select *`, so
+a column the code expects and the database lacks is a runtime error, not a
+build one.
+
 ## 2. DNS
 
 Point the domain at the VPS. Two records:

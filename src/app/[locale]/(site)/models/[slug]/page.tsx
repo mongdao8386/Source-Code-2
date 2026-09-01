@@ -65,6 +65,15 @@ export default async function ModelDetailPage({
   if (model.experience_years != null)
     spec.push([tr('experience'), `${model.experience_years} ${tr('years')}`]);
 
+  // Free-form rows added from the CMS, after the built-in spec and in the order
+  // the CMS put them. jsonb, so nothing about the shape is guaranteed: a row is
+  // shown only once both halves read as text in this locale.
+  for (const row of Array.isArray(model.details) ? model.details : []) {
+    const label = t(row?.label, locale);
+    const value = t(row?.value, locale);
+    if (label && value) spec.push([label, value]);
+  }
+
   return (
     <>
       {/* Name banner — the scale break that opens the page. */}
@@ -89,8 +98,8 @@ export default async function ModelDetailPage({
           />
 
           <dl className="border-t border-line">
-            {spec.map(([k, v]) => (
-              <div key={k} className="flex items-baseline justify-between gap-4 border-b border-line py-3">
+            {spec.map(([k, v], i) => (
+              <div key={i} className="flex items-baseline justify-between gap-4 border-b border-line py-3">
                 <dt className="kicker">{k}</dt>
                 <dd className="text-sm tabular-nums text-bone">{v}</dd>
               </div>

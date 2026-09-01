@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminHref } from '@/lib/admin-path';
-import type { Category, Model } from '@/lib/supabase/types';
+import type { Category, Model, ModelDetail } from '@/lib/supabase/types';
 import { createModelAction, updateModelAction, deleteModelAction } from '@/app/console/(dash)/models/actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, Select, FormError } from '@/components/ui/Field';
@@ -12,6 +12,15 @@ type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
 const rec = (v: unknown): Record<string, string> =>
   v && typeof v === 'object' ? (v as Record<string, string>) : {};
+
+/** Rows arrive as jsonb, so nothing about their shape is guaranteed here. */
+const rows = (v: unknown): ModelDetail[] =>
+  Array.isArray(v)
+    ? v.map((r) => ({
+        label: bag((r as ModelDetail)?.label),
+        value: bag((r as ModelDetail)?.value),
+      }))
+    : [];
 
 function slugify(s: string) {
   return s
@@ -54,6 +63,7 @@ export function ModelForm({
     eyes: m.eyes ?? '',
     seoTitle: bag((seo as Record<string, unknown>).title),
     seoDesc: bag((seo as Record<string, unknown>).description),
+    details: rows(model?.details),
   });
   const set = (p: Partial<typeof f>) => setF((x) => ({ ...x, ...p }));
 
@@ -74,6 +84,7 @@ export function ModelForm({
         bust: f.bust, waist: f.waist, hips: f.hips, shoe: f.shoe, hair: f.hair, eyes: f.eyes,
       },
       seo: { title: f.seoTitle, description: f.seoDesc },
+      details: f.details,
     };
 
     start(async () => {
@@ -180,6 +191,8 @@ export function ModelForm({
         ))}
       </div>
 
+      <DetailRows value={f.details} onChange={(details) => set({ details })} />
+
       <TwoLang label="Bio" value={f.bio} onChange={(bio) => set({ bio })} textarea />
       <TwoLang label="SEO title" value={f.seoTitle} onChange={(seoTitle) => set({ seoTitle })} />
       <TwoLang label="SEO description" value={f.seoDesc} onChange={(seoDesc) => set({ seoDesc })} textarea />
@@ -232,5 +245,111 @@ function TwoLang({
         />
       </div>
     </div>
+  );
+}
+
+/**
+ * Free-form spec rows. Anything the fixed columns above do not cover goes here
+ * and lands on the public page in this order — so a new fact is a CMS edit, not
+ * a migration. Rows left blank or half-filled are dropped server-side, so an
+ * abandoned row can simply be saved over.
+ */
+function DetailRows({
+  value,
+  onChange,
+}: {
+  value: ModelDetail[];
+  onChange: (v: ModelDetail[]) => void;
+}) {
+  const patch = (i: number, p: Partial<ModelDetail>) =>
+    onChange(value.map((r, j) => (j === i ? { ...r, ...p } : r)));
+
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= value.length) return;
+    const next = [...value];
+    [next[i], next[j]] = [next[j]!, next[i]!];
+    onChange(next);
+  };
+
+  return (
+    <fieldset>
+      <legend className="kicker mb-2">Thông tin chi tiết thêm</legend>
+      <p className="mb-4 text-xs text-bone-faint">
+        Hiện dưới phần thông số trên trang người mẫu, theo đúng thứ tự ở đây.
+        Dòng để trống sẽ bị bỏ qua.
+      </p>
+
+      <div className="space-y-4">
+        {value.map((row, i) => (
+          <div key={i} className="border border-line-strong p-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input
+                aria-label={`Nhãn VI (dòng ${i + 1})`}
+                placeholder="Nhãn · VI"
+                value={row.label.vi ?? ''}
+                onChange={(e) => patch(i, { label: { ...row.label, vi: e.target.value } })}
+              />
+              <Input
+                aria-label={`Label EN (row ${i + 1})`}
+                placeholder="Label · EN"
+                value={row.label.en ?? ''}
+                onChange={(e) => patch(i, { label: { ...row.label, en: e.target.value } })}
+              />
+              <Input
+                aria-label={`Giá trị VI (dòng ${i + 1})`}
+                placeholder="Giá trị · VI"
+                value={row.value.vi ?? ''}
+                onChange={(e) => patch(i, { value: { ...row.value, vi: e.target.value } })}
+              />
+              <Input
+                aria-label={`Value EN (row ${i + 1})`}
+                placeholder="Value · EN"
+                value={row.value.en ?? ''}
+                onChange={(e) => patch(i, { value: { ...row.value, en: e.target.value } })}
+              />
+            </div>
+
+            <div className="mt-3 flex items-center gap-4 text-xs uppercase tracking-[0.14em]">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                disabled={i === 0}
+                className="text-bone-dim hover:text-gold disabled:opacity-30 disabled:hover:text-bone-dim"
+              >
+                ↑ Lên
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                disabled={i === value.length - 1}
+                className="text-bone-dim hover:text-gold disabled:opacity-30 disabled:hover:text-bone-dim"
+              >
+                ↓ Xuống
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((_, j) => j !== i))}
+                className="ml-auto text-red-400 hover:text-red-300"
+              >
+                Xoá dòng
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {value.length < 30 && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={value.length ? 'mt-4' : ''}
+          onClick={() => onChange([...value, { label: {}, value: {} }])}
+        >
+          + Thêm dòng
+        </Button>
+      )}
+    </fieldset>
   );
 }
