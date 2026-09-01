@@ -17,7 +17,7 @@ import {
   getPublishedTestimonials,
   getSiteSettings,
 } from '@/lib/queries/public';
-import { t, tField } from '@/lib/i18n-text';
+import { t, tField, tPlain } from '@/lib/i18n-text';
 import { publicPhotoUrl } from '@/lib/storage';
 
 export async function generateMetadata({
@@ -47,7 +47,8 @@ export default async function HomePage({
     getPublishedTestimonials(),
   ]);
 
-  const heroImage = tField(settings.hero, 'image', locale);
+  // hero.image is a bare storage path, not a { vi, en } bag.
+  const heroImage = tPlain(settings.hero, 'image');
   const headline = tField(settings.hero, 'headline', locale);
   const sub = tField(settings.hero, 'sub', locale);
   const lead = models[0];

@@ -22,3 +22,16 @@ export function tField(
   const node = (obj as Record<string, unknown>)[path];
   return t(node, locale);
 }
+
+/**
+ * Reads a plain (non-bilingual) string out of a jsonb bag.
+ *
+ * Needed because `hero` mixes shapes: headline/sub are { vi, en } but `image`
+ * is a bare path. Passing that path through `t()` returns '' — it rejects
+ * anything that is not an object — which silently blanked the hero image.
+ */
+export function tPlain(obj: unknown, path: string): string {
+  if (!obj || typeof obj !== 'object') return '';
+  const v = (obj as Record<string, unknown>)[path];
+  return typeof v === 'string' ? v.trim() : '';
+}
