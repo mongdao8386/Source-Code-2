@@ -195,10 +195,18 @@
     transform: none;
   }
 
-  /* Display lines that wipe up from a mask — used on the hero. */
+  /* Display lines that wipe up from a mask — used on the hero.
+
+     The clip box is extended below the text and pulled back with a matching
+     negative margin, so layout is unchanged but the hidden overflow no longer
+     eats glyph ink. At 0.86 leading the line box is shorter than Vietnamese
+     letters with low diacritics need — "Gương mặt" was losing 10px off the
+     bottom of its descenders. */
   .line-mask {
     display: block;
     overflow: hidden;
+    padding-bottom: 0.22em;
+    margin-bottom: -0.22em;
   }
   .line-mask > span {
     display: block;
