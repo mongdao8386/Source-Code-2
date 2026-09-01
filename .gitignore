@@ -50,3 +50,6 @@ yarn-error.log*
 supabase/applyall.sql
 # ad-hoc copies of migrations pasted into the SQL Editor
 supabase/migration*.sql
+
+# ad-hoc copies pasted into the SQL Editor
+supabase/SCHEMA*.sql
