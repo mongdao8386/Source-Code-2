@@ -6,6 +6,8 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { Fraunces, Inter } from 'next/font/google';
 import { routing, type Locale } from '@/i18n/routing';
 import { clientEnv } from '@/lib/env';
+import { getSiteSettings } from '@/lib/queries/public';
+import { publicPhotoUrl } from '@/lib/storage';
 import '../globals.css';
 
 const display = Fraunces({
@@ -35,15 +37,22 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
-  title: {
-    default: 'Studio — Model booking',
-    template: '%s · Studio',
-  },
-  description: 'Tuyển chọn người mẫu chụp ảnh chuyên nghiệp.',
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const name = settings.brand_name || 'Studio';
+  return {
+    metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
+    title: { default: `${name} — Model booking`, template: `%s · ${name}` },
+    description: 'Tuyển chọn người mẫu chụp ảnh chuyên nghiệp.',
+    robots: { index: true, follow: true },
+    icons: settings.favicon_path
+      ? { icon: publicPhotoUrl(settings.favicon_path) }
+      : undefined,
+    openGraph: settings.og_image_path
+      ? { images: [publicPhotoUrl(settings.og_image_path)] }
+      : undefined,
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -57,10 +66,20 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
-  const messages = await getMessages();
+  const [messages, settings] = await Promise.all([getMessages(), getSiteSettings()]);
+
+  // The CHECK constraint on accent_color guarantees a bare hex literal, so
+  // there is nothing here that could escape the declaration.
+  const accent = /^#[0-9a-fA-F]{6}$/.test(settings.accent_color)
+    ? settings.accent_color
+    : '#c8a253';
 
   return (
-    <html lang={locale} className={`${display.variable} ${sans.variable}`}>
+    <html
+      lang={locale}
+      className={`${display.variable} ${sans.variable}`}
+      style={{ '--color-gold': accent } as React.CSSProperties}
+    >
       <body>
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>

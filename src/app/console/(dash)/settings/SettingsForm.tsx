@@ -5,6 +5,7 @@ import type { SiteSettings } from '@/lib/supabase/types';
 import { updateSettingsAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, FormError } from '@/components/ui/Field';
+import { BrandFields, type BrandState } from './BrandFields';
 
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
@@ -18,6 +19,11 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
 
   const [form, setForm] = useState({
     telegram_channel_url: settings.telegram_channel_url ?? '',
+    brand_name: settings.brand_name ?? 'STUDIO',
+    logo_path: settings.logo_path ?? '',
+    favicon_path: settings.favicon_path ?? '',
+    og_image_path: settings.og_image_path ?? '',
+    accent_color: settings.accent_color ?? '#c8a253',
     contact_email: settings.contact_email ?? '',
     phone: settings.phone ?? '',
     ig: (socials.instagram as string) ?? '',
@@ -39,6 +45,11 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
     start(async () => {
       const res = await updateSettingsAction({
         telegram_channel_url: form.telegram_channel_url,
+        brand_name: form.brand_name,
+        logo_path: form.logo_path,
+        favicon_path: form.favicon_path,
+        og_image_path: form.og_image_path,
+        accent_color: form.accent_color,
         contact_email: form.contact_email,
         phone: form.phone,
         socials: { instagram: form.ig, facebook: form.fb, tiktok: form.tt },
@@ -58,6 +69,17 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
 
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-10">
+      <BrandFields
+        value={{
+          brand_name: form.brand_name,
+          logo_path: form.logo_path,
+          favicon_path: form.favicon_path,
+          og_image_path: form.og_image_path,
+          accent_color: form.accent_color,
+        }}
+        onChange={(patch: Partial<BrandState>) => set(patch)}
+      />
+
       <section className="space-y-4">
         <h2 className="kicker">Booking</h2>
         <div>

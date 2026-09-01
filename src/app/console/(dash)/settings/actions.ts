@@ -11,8 +11,26 @@ const urlOrEmpty = z
   .refine((v) => v === '' || /^https:\/\/\S+$/.test(v), 'must be https URL')
   .default('');
 
+const storagePath = z
+  .string()
+  .trim()
+  .max(300)
+  // Only paths this app wrote: the brand/ prefix plus a generated filename.
+  .refine((v) => v === '' || /^brand\/[a-z]+-[0-9a-f-]{36}\.(webp|png)$/.test(v), 'bad path')
+  .default('');
+
 const schema = z.object({
   telegram_channel_url: urlOrEmpty,
+  brand_name: z.string().trim().min(1).max(40).default('STUDIO'),
+  logo_path: storagePath,
+  favicon_path: storagePath,
+  og_image_path: storagePath,
+  // Mirrors the CHECK constraint; the value lands in a CSS custom property.
+  accent_color: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .default('#c8a253'),
   contact_email: z.string().trim().max(200).email().or(z.literal('')).default(''),
   phone: z.string().trim().max(40).default(''),
   socials: z

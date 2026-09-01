@@ -32,6 +32,11 @@ export const getSiteSettings = cache(async (): Promise<PublicSiteSettings> => {
       hero: {},
       announcement: {},
       maintenance_mode: false,
+      brand_name: 'STUDIO',
+      logo_path: '',
+      favicon_path: '',
+      og_image_path: '',
+      accent_color: '#c8a253',
     }
   );
 });

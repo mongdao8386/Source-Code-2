@@ -94,6 +94,12 @@ export type Testimonial = {
 export type SiteSettings = {
   id: boolean;
   telegram_channel_url: string;
+  brand_name: string;
+  logo_path: string;
+  favicon_path: string;
+  og_image_path: string;
+  /** Hex literal, enforced by a CHECK constraint — it lands in a CSS variable. */
+  accent_color: string;
   contact_email: string;
   phone: string;
   socials: Json;
@@ -106,7 +112,16 @@ export type SiteSettings = {
 
 export type PublicSiteSettings = Pick<
   SiteSettings,
-  'telegram_channel_url' | 'socials' | 'hero' | 'announcement' | 'maintenance_mode'
+  | 'telegram_channel_url'
+  | 'socials'
+  | 'hero'
+  | 'announcement'
+  | 'maintenance_mode'
+  | 'brand_name'
+  | 'logo_path'
+  | 'favicon_path'
+  | 'og_image_path'
+  | 'accent_color'
 >;
 
 export type AdminInvite = {

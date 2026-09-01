@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitch } from '@/components/site/LocaleSwitch';
 import { BookingButton } from '@/components/site/BookingButton';
+import { Brand } from '@/components/site/Brand';
 import { cn } from '@/lib/cn';
 
 const links = [
@@ -13,7 +14,15 @@ const links = [
   { href: '/guide', key: 'guide' },
 ] as const;
 
-export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
+export function SiteHeader({
+  telegramUrl,
+  brandName,
+  logoPath,
+}: {
+  telegramUrl: string;
+  brandName: string;
+  logoPath: string;
+}) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -50,7 +59,7 @@ export function SiteHeader({ telegramUrl }: { telegramUrl: string }) {
           onClick={() => setOpen(false)}
           className="font-display text-xl leading-none tracking-tight text-bone"
         >
-          STUDIO<span className="text-gold">.</span>
+          <Brand name={brandName} logoPath={logoPath} logoHeight={26} />
         </Link>
 
         <nav className="hidden items-center gap-10 md:flex">

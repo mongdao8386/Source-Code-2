@@ -18,7 +18,7 @@ export default async function SiteLayout({
   const settings = await getSiteSettings();
 
   if (settings.maintenance_mode) {
-    return <MaintenanceScreen />;
+    return <MaintenanceScreen brandName={settings.brand_name} />;
   }
 
   return (
@@ -26,7 +26,11 @@ export default async function SiteLayout({
       {/* The header is fixed so the hero runs full-bleed under it; every page
           therefore carries its own top padding rather than relying on flow. */}
       <AnnouncementBar settings={settings} />
-      <SiteHeader telegramUrl={settings.telegram_channel_url} />
+      <SiteHeader
+        telegramUrl={settings.telegram_channel_url}
+        brandName={settings.brand_name}
+        logoPath={settings.logo_path}
+      />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>

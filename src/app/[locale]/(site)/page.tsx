@@ -8,6 +8,7 @@ import type { Locale } from '@/i18n/routing';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/site/Reveal';
 import { Marquee } from '@/components/site/Marquee';
+import { Stars } from '@/components/site/Stars';
 import { ModelCard } from '@/components/site/ModelCard';
 import { BookingButton } from '@/components/site/BookingButton';
 import {
@@ -193,10 +194,11 @@ export default async function HomePage({
             {testimonials.map((q, i) => (
               <Reveal as="li" key={q.id} delay={(i % 3) * 90}>
                 <blockquote>
+                  <Stars rating={q.rating} />
                   <span aria-hidden className="font-display text-5xl leading-none text-gold">
                     &ldquo;
                   </span>
-                  <p className="mt-3 font-display text-xl leading-snug text-bone">
+                  <p className="mt-1 font-display text-xl leading-snug text-bone">
                     {t(q.quote, locale)}
                   </p>
                   <footer className="kicker mt-5 border-t border-line pt-3">

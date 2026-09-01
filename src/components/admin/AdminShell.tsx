@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server';
 import type { StaffRole } from '@/lib/supabase/types';
 import { signOutAction } from '@/lib/auth/actions';
 import { AdminNav } from './AdminNav';
+import { Brand } from '@/components/site/Brand';
+import { getSiteSettings } from '@/lib/queries/public';
 
 export async function AdminShell({
   role,
@@ -13,14 +15,14 @@ export async function AdminShell({
   email: string;
   children: ReactNode;
 }) {
-  const t = await getTranslations('admin');
+  const [t, settings] = await Promise.all([getTranslations('admin'), getSiteSettings()]);
 
   return (
     <div className="grid min-h-dvh grid-cols-1 md:grid-cols-[15rem_1fr]">
       <aside className="pad-safe-top hidden flex-col border-r border-line bg-surface-1 md:flex">
         <div className="border-b border-line px-5 py-5">
           <p className="font-display text-lg">
-            STUDIO<span className="text-gold">.</span>
+            <Brand name={settings.brand_name} />
           </p>
           <p className="kicker mt-1">Console</p>
         </div>
@@ -49,7 +51,7 @@ export async function AdminShell({
       <div className="flex flex-col">
         <header className="pad-safe-top gutter-safe flex items-center justify-between border-b border-line py-3 md:hidden">
           <p className="font-display text-base">
-            STUDIO<span className="text-gold">.</span>
+            <Brand name={settings.brand_name} />
           </p>
           <form action={signOutAction}>
             <button className="text-xs uppercase tracking-[0.18em] text-bone-faint">

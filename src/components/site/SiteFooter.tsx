@@ -1,10 +1,13 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Container } from '@/components/ui/Container';
+import { Brand } from '@/components/site/Brand';
+import { getSiteSettings } from '@/lib/queries/public';
 
 export async function SiteFooter() {
   const t = await getTranslations('footer');
   const nav = await getTranslations('nav');
+  const settings = await getSiteSettings();
   const year = new Date().getFullYear();
 
   const links = [
@@ -19,7 +22,10 @@ export async function SiteFooter() {
       {/* Oversized wordmark — the closing beat, matching the hero's scale. */}
       <Container className="py-16 md:py-24">
         <p className="text-mega leading-[0.8] tracking-[-0.05em] text-surface-2">
-          STUDIO<span className="text-gold/30">.</span>
+          <Brand
+            name={settings.brand_name}
+            dotClassName="text-gold/30"
+          />
         </p>
       </Container>
 
@@ -39,7 +45,7 @@ export async function SiteFooter() {
         <div className="flex flex-col gap-1 text-[0.6875rem] uppercase tracking-[0.18em] text-bone-faint md:items-end">
           <span>{t('built')}</span>
           <span>
-            &copy; {year} Studio. {t('rights')}
+            &copy; {year} {settings.brand_name}. {t('rights')}
           </span>
         </div>
       </Container>
