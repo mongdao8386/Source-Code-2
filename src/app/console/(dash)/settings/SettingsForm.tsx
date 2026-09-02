@@ -9,6 +9,33 @@ import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
 import { TwoLang } from '@/components/admin/TwoLang';
 
+/**
+ * The action already reports which field failed; the form used to throw that
+ * away and print "Kiểm tra lại các trường", leaving you to guess across a
+ * dozen inputs. Name them instead.
+ */
+const FIELD_LABELS: Record<string, string> = {
+  telegram_channel_url: 'Telegram channel URL',
+  brand_name: 'Tên site',
+  logo_path: 'Logo',
+  favicon_path: 'Favicon',
+  og_image_path: 'Ảnh chia sẻ link',
+  accent_color: 'Màu nhấn',
+  contact_email: 'Contact email',
+  phone: 'Phone',
+  socials: 'Instagram / Facebook / TikTok',
+  hero: 'Hero (headline, sub hoặc ảnh nền)',
+  announcement: 'Announcement',
+  maintenance_mode: 'Maintenance mode',
+};
+
+function describe(res: { error: string; fieldErrors?: Record<string, string[]> }): string {
+  if (res.error !== 'validation') return res.error;
+  const bad = Object.keys(res.fieldErrors ?? {});
+  if (bad.length === 0) return 'Kiểm tra lại các trường.';
+  return `Chưa lưu được — kiểm tra: ${bad.map((k) => FIELD_LABELS[k] ?? k).join(', ')}.`;
+}
+
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
 const obj = (v: unknown): Record<string, unknown> =>
@@ -62,7 +89,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       setMsg(
         res.ok
           ? { kind: 'ok', text: 'Đã lưu / Saved' }
-          : { kind: 'err', text: res.error === 'validation' ? 'Kiểm tra lại các trường.' : res.error },
+          : { kind: 'err', text: describe(res) },
       );
     });
   }

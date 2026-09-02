@@ -64,12 +64,16 @@ const schema = z.object({
     .object({
       headline: i18nString,
       sub: i18nString,
-      // Either an object this app uploaded (kind=hero) or an external https
-      // URL — publicPhotoUrl passes anything starting with http straight
-      // through, and that was the only way to set a hero before the uploader.
+      // Uploaded objects only, same rule as the other brand assets.
+      //
+      // This field used to take any string, and its label offered "storage
+      // path or https URL". next/image never honoured that: remotePatterns in
+      // next.config.mjs admits Supabase public storage and nothing else, so an
+      // external URL was accepted here, stored, and then silently dropped at
+      // render — a black hero with no error anywhere to explain it.
       image: optionalText(400).refine(
-        (v) => v === '' || BRAND_PATH.test(v) || /^https:\/\/\S+$/.test(v),
-        'must be an uploaded path or an https URL',
+        (v) => v === '' || BRAND_PATH.test(v),
+        'must be an uploaded image',
       ),
     })
     .default({}),

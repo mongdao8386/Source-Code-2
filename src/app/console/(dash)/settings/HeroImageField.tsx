@@ -3,7 +3,10 @@
 import { useRef, useState } from 'react';
 import { publicPhotoUrl } from '@/lib/storage';
 import { Button } from '@/components/ui/Button';
-import { Input, Label } from '@/components/ui/Field';
+import { Label } from '@/components/ui/Field';
+
+/** Mirrors the server rule: only objects this app uploaded are valid. */
+const UPLOADED = /^brand\/[a-z]+-[0-9a-f-]{36}\.(webp|png)$/;
 
 /**
  * Hero image intake.
@@ -13,8 +16,10 @@ import { Input, Label } from '@/components/ui/Field';
  * else first and paste a URL back. Same endpoint as the rest of the brand
  * assets, `kind=hero`, which crops to the frame the home page actually renders.
  *
- * The manual box stays underneath: an external https URL is still a valid
- * value, and it is the only way to point at an image this app did not upload.
+ * There is deliberately no manual path box. The old one offered "storage path
+ * or https URL", but next/image only serves what remotePatterns admits — the
+ * Supabase public bucket — so an external URL saved cleanly and then rendered
+ * as nothing. Uploading is the only way that actually reaches the page.
  */
 
 const ERRORS: Record<string, string> = {
@@ -36,6 +41,11 @@ export function HeroImageField({
   const [busy, setBusy] = useState(false);
   const [over, setOver] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // A value saved back when this field was a free-text box. It renders in the
+  // preview below but not on the public page, so say so rather than let it
+  // look fine here and come out black there.
+  const legacy = value !== '' && !UPLOADED.test(value);
 
   async function upload(file: File | undefined) {
     if (!file) return;
@@ -130,10 +140,13 @@ export function HeroImageField({
 
       {err && <p className="mt-1 text-xs text-red-300">{err}</p>}
 
-      <div className="mt-3">
-        <Label htmlFor="hi">Hoặc dán đường dẫn / URL https</Label>
-        <Input id="hi" value={value} onChange={(e) => onChange(e.target.value)} />
-      </div>
+      {legacy && (
+        <p className="mt-2 text-xs text-amber-300">
+          Giá trị hiện tại là một đường dẫn ngoài, không phải ảnh đã tải lên. Trang
+          chủ không hiển thị được ảnh này — tải lại ảnh bằng nút ở trên, hoặc bấm
+          Xoá, rồi mới lưu được.
+        </p>
+      )}
     </div>
   );
 }
