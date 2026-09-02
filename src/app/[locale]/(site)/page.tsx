@@ -39,8 +39,9 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [tr, settings, models, categories, testimonials] = await Promise.all([
+  const [tr, trm, settings, models, categories, testimonials] = await Promise.all([
     getTranslations('home'),
+    getTranslations('models'),
     getSiteSettings(),
     getPublishedModels({ limit: 8 }),
     getCategories(),
@@ -52,6 +53,23 @@ export default async function HomePage({
   const headline = tField(settings.hero, 'headline', locale);
   const sub = tField(settings.hero, 'sub', locale);
   const lead = models[0];
+
+  // Caption for the lead portrait. The column beside it is 1fr against a very
+  // tall image, so a name and an ordinal left most of it empty. These are the
+  // same facts the profile page opens with — enough to make the space earn
+  // itself without turning the board into a spec sheet.
+  const leadBio = lead ? t(lead.bio, locale) : '';
+  const leadSpec: Array<[string, string]> = [];
+  if (lead) {
+    const lm = (lead.measurements ?? {}) as Record<string, string | number>;
+    if (lead.height_cm) leadSpec.push([trm('height'), `${lead.height_cm} cm`]);
+    const measure = ['bust', 'waist', 'hips'].map((k) => lm[k]).filter(Boolean).join(' · ');
+    if (measure) leadSpec.push([trm('measurements'), measure]);
+    if (lead.city) leadSpec.push([trm('city'), lead.city]);
+    if (lead.experience_years != null) {
+      leadSpec.push([trm('experience'), `${lead.experience_years} ${trm('years')}`]);
+    }
+  }
 
   return (
     <>
@@ -139,10 +157,29 @@ export default async function HomePage({
                 <ModelCard model={lead} locale={locale} index={0} priority />
                 <div className="pb-6">
                   <p className="ordinal">01 / {String(models.length).padStart(2, '0')}</p>
-                  <p className="mt-4 font-display text-3xl leading-tight text-bone">
+                  <Link
+                    href={{ pathname: '/models/[slug]', params: { slug: lead.slug } }}
+                    className="mt-4 block font-display text-3xl leading-tight text-bone transition-colors hover:text-gold"
+                  >
                     {lead.stage_name}
-                  </p>
-                  {lead.city && <p className="kicker mt-3">{lead.city}</p>}
+                  </Link>
+
+                  {leadBio && (
+                    <p className="mt-5 line-clamp-4 max-w-[42ch] text-sm leading-relaxed text-bone-dim">
+                      {leadBio}
+                    </p>
+                  )}
+
+                  {leadSpec.length > 0 && (
+                    <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-6">
+                      {leadSpec.map(([label, value]) => (
+                        <div key={label}>
+                          <dt className="kicker">{label}</dt>
+                          <dd className="mt-1.5 text-sm text-bone">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
                 </div>
               </Reveal>
             )}
