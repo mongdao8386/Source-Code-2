@@ -58,6 +58,12 @@ build one.
 
 ## 2. DNS
 
+**Domain: `studiocasting.io.vn`** — as of 2026-09-02 it does not resolve and the
+`.io.vn` registry holds no delegation for it. Hostinger's own nameserver
+(`ns1.dns-parking.com`) also answers NXDOMAIN, which it would not do if the zone
+were hosted there. Register it (or finish pointing its nameservers at Hostinger)
+before any of the below will take effect.
+
 Point the domain at the VPS. Two records:
 
 | Type | Name | Value | TTL |
@@ -69,7 +75,7 @@ Wait for it to resolve before starting the stack — Caddy asks Let's Encrypt fo
 a certificate on first boot, and that fails if the name does not yet point here:
 
 ```bash
-dig +short your-domain.tld     # must print 187.53.132.36
+dig +short studiocasting.io.vn     # must print 187.53.132.36
 ```
 
 ## 3. Prepare the server
@@ -112,7 +118,7 @@ Fill in `.env`. The values that matter:
 
 | Key | Note |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://your-domain.tld`, no trailing slash |
+| `NEXT_PUBLIC_SITE_URL` | `https://studiocasting.io.vn`, no trailing slash |
 | `SITE_DOMAIN` | the bare domain — Caddy requests the certificate for it |
 | `ACME_EMAIL` | Let's Encrypt notifications |
 | `NEXT_PUBLIC_ADMIN_PATH` | the CMS path, e.g. `/quan-tri-x7k2` |
@@ -130,8 +136,8 @@ docker compose logs -f caddy      # watch the certificate get issued
 Check it:
 
 ```bash
-curl -fsS https://your-domain.tld/api/health      # {"status":"ok"}
-curl -sI https://your-domain.tld | grep -i 'strict-transport\|content-security'
+curl -fsS https://studiocasting.io.vn/api/health      # {"status":"ok"}
+curl -sI https://studiocasting.io.vn | grep -i 'strict-transport\|content-security'
 ```
 
 > **`NEXT_PUBLIC_*` is compiled into the bundle, not read at runtime.** Changing
@@ -205,8 +211,8 @@ Storage objects (photos, video, brand assets) live in Supabase Storage and are
 
 ## Smoke test after every deploy
 
-- `https://your-domain.tld/vi` and `/en` render.
-- `https://your-domain.tld/<admin-path>` → sign-in; any other path under it
+- `https://studiocasting.io.vn/vi` and `/en` render.
+- `https://studiocasting.io.vn/<admin-path>` → sign-in; any other path under it
   returns **404** while signed out, and `/console` returns 404 always.
 - Sign in as owner → TOTP is demanded → dashboard.
 - Settings → Telegram URL saved → the home page button opens that channel.
