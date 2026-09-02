@@ -6,6 +6,9 @@ import { publicPhotoUrl } from '@/lib/storage';
 import { Button } from '@/components/ui/Button';
 
 const MAX_SECONDS = 15;
+
+/** Must track @ffmpeg/core in package.json — a mismatched core fails to load. */
+const CORE_VERSION = '0.12.10';
 const MAX_BYTES = 8 * 1024 * 1024;
 
 type Phase = 'idle' | 'picked' | 'loading-core' | 'trimming' | 'uploading';
@@ -115,12 +118,32 @@ export function VideoTrimmer({
     if (ffmpegRef.current) return ffmpegRef.current;
     setPhase('loading-core');
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    const { toBlobURL } = await import('@ffmpeg/util');
     const ff = new FFmpeg();
     ff.on('progress', ({ progress: p }) => setProgress(Math.round(p * 100)));
-    await ff.load({
-      coreURL: '/ffmpeg/ffmpeg-core.js',
-      wasmURL: '/ffmpeg/ffmpeg-core.wasm',
-    });
+
+    // The core is ~32 MB and the box serves it at roughly 50 KB/s — a quarter
+    // of an hour before a single frame is trimmed, measured, with the VPS
+    // sitting at 2% CPU the whole time. The same bytes come off jsDelivr about
+    // fifteen times faster.
+    //
+    // copy-ffmpeg.mjs still puts a same-origin copy in public/, and that is
+    // what runs if the CDN is unreachable — the original objection to a CDN
+    // was depending on a third party's uptime, and a fallback answers it
+    // without leaving the editor unusable in the meantime.
+    try {
+      const base = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/umd`;
+      await ff.load({
+        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, 'application/wasm'),
+      });
+    } catch {
+      await ff.load({
+        coreURL: '/ffmpeg/ffmpeg-core.js',
+        wasmURL: '/ffmpeg/ffmpeg-core.wasm',
+      });
+    }
+
     ffmpegRef.current = ff;
     return ff;
   }
@@ -151,7 +174,7 @@ export function VideoTrimmer({
         '-i', inName,
         '-vf', "scale='min(720,iw)':-2",
         '-c:v', 'libx264',
-        '-preset', 'veryfast',
+        '-preset', 'ultrafast',
         '-crf', '30',
         '-maxrate', '2M',
         '-bufsize', '4M',

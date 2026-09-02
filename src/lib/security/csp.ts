@@ -31,6 +31,12 @@ export function buildCsp({ allowWasm = false }: { allowWasm?: boolean } = {}) {
   // correct either way.
   const supabase = [clientEnv.NEXT_PUBLIC_SUPABASE_URL, 'https://*.supabase.co'];
 
+  // The ffmpeg core is ~32 MB and the VPS serves it at about 50 KB/s, so the
+  // CMS pulls it from jsDelivr and keeps the same-origin copy as a fallback.
+  // Granted only alongside allowWasm — the public site never loads it and
+  // keeps a policy with no external origins at all.
+  const ffmpegCdn = allowWasm ? ['https://cdn.jsdelivr.net'] : [];
+
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
     'base-uri': ["'self'"],
@@ -50,7 +56,7 @@ export function buildCsp({ allowWasm = false }: { allowWasm?: boolean } = {}) {
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com'],
     'img-src': ["'self'", 'data:', 'blob:', ...supabase],
-    'connect-src': ["'self'", ...supabase, ...(isDev ? ['ws:'] : [])],
+    'connect-src': ["'self'", ...supabase, ...ffmpegCdn, ...(isDev ? ['ws:'] : [])],
     'media-src': ["'self'", 'blob:', ...supabase],
     'worker-src': ["'self'", 'blob:'],
     'manifest-src': ["'self'"],
