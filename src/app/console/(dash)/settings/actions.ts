@@ -4,20 +4,37 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { cmsAction, i18nString } from '@/lib/cms/action';
 
-const urlOrEmpty = z
-  .string()
-  .trim()
-  .max(300)
-  .refine((v) => v === '' || /^https:\/\/\S+$/.test(v), 'must be https URL')
-  .default('');
+/**
+ * Optional free text.
+ *
+ * Every column behind these fields is `not null default ''`, so "no value" is
+ * stored as the empty string rather than NULL. The CMS, though, can legitimately
+ * send null (a field the form cleared) or whitespace (a field someone spaced
+ * out), and neither should cost the operator a whole failed save of unrelated
+ * settings. Anything empty lands as ''.
+ *
+ * Before this, `null` failed with "Expected string, received null" and — for
+ * contact_email — a single space failed with "Invalid email", because the
+ * `.or(z.literal(''))` branch tested the raw value and never saw the trim.
+ */
+const optionalText = (max: number) =>
+  z
+    .union([z.string(), z.null(), z.undefined()])
+    .transform((v) => (v ?? '').trim())
+    .pipe(z.string().max(max));
 
-const storagePath = z
-  .string()
-  .trim()
-  .max(300)
-  // Only paths this app wrote: the brand/ prefix plus a generated filename.
-  .refine((v) => v === '' || /^brand\/[a-z]+-[0-9a-f-]{36}\.(webp|png)$/.test(v), 'bad path')
-  .default('');
+const urlOrEmpty = optionalText(300).refine(
+  (v) => v === '' || /^https:\/\/\S+$/.test(v),
+  'must be https URL',
+);
+
+// Only paths this app wrote: the brand/ prefix plus a generated filename.
+const BRAND_PATH = /^brand\/[a-z]+-[0-9a-f-]{36}\.(webp|png)$/;
+
+const storagePath = optionalText(300).refine(
+  (v) => v === '' || BRAND_PATH.test(v),
+  'bad path',
+);
 
 const schema = z.object({
   telegram_channel_url: urlOrEmpty,
@@ -31,8 +48,11 @@ const schema = z.object({
     .trim()
     .regex(/^#[0-9a-fA-F]{6}$/)
     .default('#c8a253'),
-  contact_email: z.string().trim().max(200).email().or(z.literal('')).default(''),
-  phone: z.string().trim().max(40).default(''),
+  contact_email: optionalText(200).refine(
+    (v) => v === '' || z.string().email().safeParse(v).success,
+    'must be an email',
+  ),
+  phone: optionalText(40),
   socials: z
     .object({
       instagram: urlOrEmpty,
@@ -44,7 +64,13 @@ const schema = z.object({
     .object({
       headline: i18nString,
       sub: i18nString,
-      image: z.string().trim().max(400).default(''),
+      // Either an object this app uploaded (kind=hero) or an external https
+      // URL — publicPhotoUrl passes anything starting with http straight
+      // through, and that was the only way to set a hero before the uploader.
+      image: optionalText(400).refine(
+        (v) => v === '' || BRAND_PATH.test(v) || /^https:\/\/\S+$/.test(v),
+        'must be an uploaded path or an https URL',
+      ),
     })
     .default({}),
   announcement: z

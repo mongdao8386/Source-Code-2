@@ -6,6 +6,7 @@ import { updateSettingsAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, FormError } from '@/components/ui/Field';
 import { BrandFields, type BrandState } from './BrandFields';
+import { HeroImageField } from './HeroImageField';
 
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
@@ -104,14 +105,10 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
           onChange={(headline) => set({ headline })}
         />
         <TwoLang label="Sub" value={form.sub} onChange={(sub) => set({ sub })} textarea />
-        <div>
-          <Label htmlFor="hi">Hero image (storage path or https URL)</Label>
-          <Input
-            id="hi"
-            value={form.heroImage}
-            onChange={(e) => set({ heroImage: e.target.value })}
-          />
-        </div>
+        <HeroImageField
+          value={form.heroImage}
+          onChange={(heroImage) => set({ heroImage })}
+        />
       </section>
 
       <section className="space-y-4">

@@ -14,6 +14,10 @@ const KINDS = {
   logo: { w: 900, h: 300, fit: 'inside' as const, format: 'webp' as const },
   favicon: { w: 256, h: 256, fit: 'cover' as const, format: 'png' as const },
   og: { w: 1200, h: 630, fit: 'cover' as const, format: 'webp' as const },
+  // Full-bleed background behind the home headline: rendered `fill` +
+  // `object-cover` at `sizes="100vw"`, so it is cropped to a fixed frame here
+  // rather than left at whatever aspect ratio the photographer handed over.
+  hero: { w: 2000, h: 1250, fit: 'cover' as const, format: 'webp' as const },
 };
 type Kind = keyof typeof KINDS;
 
