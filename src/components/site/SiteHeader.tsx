@@ -59,7 +59,12 @@ export function SiteHeader({
           onClick={() => setOpen(false)}
           className="font-display text-xl leading-none tracking-tight text-bone"
         >
-          <Brand name={brandName} logoPath={logoPath} logoHeight={26} />
+          <Brand
+            name={brandName}
+            logoPath={logoPath}
+            logoHeight={40}
+            className="max-w-[160px] sm:max-w-[220px]"
+          />
         </Link>
 
         <nav className="hidden items-center gap-10 md:flex">
