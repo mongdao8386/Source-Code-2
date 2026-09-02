@@ -106,12 +106,24 @@ export function SiteHeader({
         </button>
       </div>
 
-      {/* Full-screen mobile menu with oversized type. */}
+      {/*
+        Full-screen mobile menu with oversized type.
+
+        `hidden` rather than an invisible/opacity-0 class pair, because those
+        are utilities in a stylesheet and a browser applies a stylesheet as it
+        streams. On a slow enough connection there is a window where the type
+        rules have landed and the hiding rules have not, and the menu paints
+        over the page in full — reported from a phone, with the nav's "Models"
+        sitting on top of the model's own name. `[hidden]` is a user-agent
+        rule, so it holds before any CSS arrives at all.
+
+        The cost is the 500ms cross-fade, which cannot run against display:
+        none. A menu that is occasionally wrong is worse than one that opens
+        plainly.
+      */}
       <div
-        className={cn(
-          'top-below-header fixed inset-x-0 bottom-0 bg-ink transition-all duration-500 ease-lux md:hidden',
-          open ? 'visible opacity-100' : 'invisible opacity-0',
-        )}
+        hidden={!open}
+        className="top-below-header fixed inset-x-0 bottom-0 bg-ink md:hidden"
       >
         <div className="gutter-safe flex h-full flex-col justify-between overflow-y-auto pt-8 pb-[calc(3rem+env(safe-area-inset-bottom,0px))]">
           <nav className="flex flex-col">
