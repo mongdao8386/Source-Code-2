@@ -3,6 +3,8 @@ import sharp from 'sharp';
 import { requireStaff } from '@/lib/auth/guards';
 import { createClient } from '@/lib/supabase/server';
 import { audit } from '@/lib/audit';
+import { getSiteSettings } from '@/lib/queries/public';
+import { watermarkImage } from '@/lib/watermark';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -59,9 +61,12 @@ export async function POST(request: NextRequest) {
       .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 82 });
     const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
-    out = data;
     width = info.width;
     height = info.height;
+    // Marked after the resize so the tile is sized against the stored image,
+    // not the original a phone may have shot at 4000px.
+    const { brand_name } = await getSiteSettings();
+    out = await watermarkImage(data, brand_name);
   } catch {
     return NextResponse.json({ error: 'decode_failed' }, { status: 422 });
   }
