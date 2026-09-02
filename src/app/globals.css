@@ -241,9 +241,14 @@
   .marquee {
     display: flex;
     width: max-content;
-    animation: marquee 38s linear infinite;
+    /* Photo strips are far wider than the text ticker and need longer to
+       cross, so the duration is a variable the caller can raise. */
+    animation: marquee var(--marquee-duration, 38s) linear infinite;
   }
-  .marquee:hover {
+  .marquee:hover,
+  /* Tabbing into a link inside a strip that keeps moving pulls the focused
+     element out from under the reader. */
+  .marquee:focus-within {
     animation-play-state: paused;
   }
   @keyframes marquee {

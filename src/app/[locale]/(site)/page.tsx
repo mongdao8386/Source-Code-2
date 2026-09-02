@@ -10,6 +10,7 @@ import { Reveal } from '@/components/site/Reveal';
 import { Marquee } from '@/components/site/Marquee';
 import { Stars } from '@/components/site/Stars';
 import { ModelCard } from '@/components/site/ModelCard';
+import { ModelTicker } from '@/components/site/ModelTicker';
 import { BookingButton } from '@/components/site/BookingButton';
 import {
   getCategories,
@@ -196,6 +197,9 @@ export default async function HomePage({
           <p className="mt-14 text-sm text-bone-faint">&#8212;</p>
         )}
       </Container>
+
+      {/* ── Faces on a loop ──────────────────────────────────── */}
+      <ModelTicker models={models} locale={locale} />
 
       {/* ── Categories as an oversized list ──────────────────── */}
       {categories.length > 0 && (
