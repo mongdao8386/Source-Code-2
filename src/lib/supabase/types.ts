@@ -21,6 +21,7 @@ export type ContentStatus = 'draft' | 'published';
 /** Bilingual string bag. */
 export type I18nText = { vi?: string; en?: string };
 
+
 type Timestamps = { created_at: string; updated_at: string };
 
 export type Profile = {
