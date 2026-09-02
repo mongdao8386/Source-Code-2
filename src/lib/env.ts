@@ -38,6 +38,12 @@ const serverSchema = z.object({
   OWNER_EMAIL: z.string().email().optional(),
   OWNER_INITIAL_PASSWORD: z.string().optional(),
   OWNER_FULL_NAME: z.string().optional(),
+  // Optional. Without it the CMS simply hides the "Dịch" buttons and the
+  // bilingual fields stay hand-typed, exactly as before.
+  DEEPL_API_KEY: z.string().optional(),
+  // DeepL runs free and paid keys on different hosts. Free keys end in ':fx',
+  // which is what the route infers from — set this only to override that.
+  DEEPL_API_URL: z.string().url().optional(),
 });
 
 type ServerEnv = z.infer<typeof serverSchema>;

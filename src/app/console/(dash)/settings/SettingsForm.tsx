@@ -4,9 +4,10 @@ import { useState, useTransition } from 'react';
 import type { SiteSettings } from '@/lib/supabase/types';
 import { updateSettingsAction } from './actions';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, Textarea, FormError } from '@/components/ui/Field';
+import { Input, Label, FormError } from '@/components/ui/Field';
 import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
+import { TwoLang } from '@/components/admin/TwoLang';
 
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
@@ -170,39 +171,3 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   );
 }
 
-function TwoLang({
-  label,
-  value,
-  onChange,
-  textarea = false,
-}: {
-  label: string;
-  value: Bag;
-  onChange: (v: Bag) => void;
-  textarea?: boolean;
-}) {
-  const C = textarea ? Textarea : Input;
-  return (
-    <div>
-      <Label>{label}</Label>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <C
-          aria-label={`${label} VI`}
-          placeholder="VI"
-          value={value.vi ?? ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
-            onChange({ ...value, vi: e.target.value })
-          }
-        />
-        <C
-          aria-label={`${label} EN`}
-          placeholder="EN"
-          value={value.en ?? ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
-            onChange({ ...value, en: e.target.value })
-          }
-        />
-      </div>
-    </div>
-  );
-}

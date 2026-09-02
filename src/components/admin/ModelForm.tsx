@@ -6,7 +6,9 @@ import { adminHref } from '@/lib/admin-path';
 import type { Category, Model, ModelDetail } from '@/lib/supabase/types';
 import { createModelAction, updateModelAction, deleteModelAction } from '@/app/console/(dash)/models/actions';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, Textarea, Select, FormError } from '@/components/ui/Field';
+import { TwoLang } from './TwoLang';
+import { DetailRows } from './DetailRows';
+import { Input, Label, Select, FormError } from '@/components/ui/Field';
 
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
@@ -210,146 +212,5 @@ export function ModelForm({
         )}
       </div>
     </form>
-  );
-}
-
-function TwoLang({
-  label,
-  value,
-  onChange,
-  textarea = false,
-}: {
-  label: string;
-  value: Bag;
-  onChange: (v: Bag) => void;
-  textarea?: boolean;
-}) {
-  const C = textarea ? Textarea : Input;
-  return (
-    <div>
-      <Label>{label}</Label>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <C
-          placeholder="VI"
-          value={value.vi ?? ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
-            onChange({ ...value, vi: e.target.value })
-          }
-        />
-        <C
-          placeholder="EN"
-          value={value.en ?? ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement & HTMLTextAreaElement>) =>
-            onChange({ ...value, en: e.target.value })
-          }
-        />
-      </div>
-    </div>
-  );
-}
-
-/**
- * Free-form spec rows. Anything the fixed columns above do not cover goes here
- * and lands on the public page in this order — so a new fact is a CMS edit, not
- * a migration. Rows left blank or half-filled are dropped server-side, so an
- * abandoned row can simply be saved over.
- */
-function DetailRows({
-  value,
-  onChange,
-}: {
-  value: ModelDetail[];
-  onChange: (v: ModelDetail[]) => void;
-}) {
-  const patch = (i: number, p: Partial<ModelDetail>) =>
-    onChange(value.map((r, j) => (j === i ? { ...r, ...p } : r)));
-
-  const move = (i: number, dir: -1 | 1) => {
-    const j = i + dir;
-    if (j < 0 || j >= value.length) return;
-    const next = [...value];
-    [next[i], next[j]] = [next[j]!, next[i]!];
-    onChange(next);
-  };
-
-  return (
-    <fieldset>
-      <legend className="kicker mb-2">Thông tin chi tiết thêm</legend>
-      <p className="mb-4 text-xs text-bone-faint">
-        Hiện dưới phần thông số trên trang người mẫu, theo đúng thứ tự ở đây.
-        Dòng để trống sẽ bị bỏ qua.
-      </p>
-
-      <div className="space-y-4">
-        {value.map((row, i) => (
-          <div key={i} className="border border-line-strong p-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Input
-                aria-label={`Nhãn VI (dòng ${i + 1})`}
-                placeholder="Nhãn · VI"
-                value={row.label.vi ?? ''}
-                onChange={(e) => patch(i, { label: { ...row.label, vi: e.target.value } })}
-              />
-              <Input
-                aria-label={`Label EN (row ${i + 1})`}
-                placeholder="Label · EN"
-                value={row.label.en ?? ''}
-                onChange={(e) => patch(i, { label: { ...row.label, en: e.target.value } })}
-              />
-              <Input
-                aria-label={`Giá trị VI (dòng ${i + 1})`}
-                placeholder="Giá trị · VI"
-                value={row.value.vi ?? ''}
-                onChange={(e) => patch(i, { value: { ...row.value, vi: e.target.value } })}
-              />
-              <Input
-                aria-label={`Value EN (row ${i + 1})`}
-                placeholder="Value · EN"
-                value={row.value.en ?? ''}
-                onChange={(e) => patch(i, { value: { ...row.value, en: e.target.value } })}
-              />
-            </div>
-
-            <div className="mt-3 flex items-center gap-4 text-xs uppercase tracking-[0.14em]">
-              <button
-                type="button"
-                onClick={() => move(i, -1)}
-                disabled={i === 0}
-                className="text-bone-dim hover:text-gold disabled:opacity-30 disabled:hover:text-bone-dim"
-              >
-                ↑ Lên
-              </button>
-              <button
-                type="button"
-                onClick={() => move(i, 1)}
-                disabled={i === value.length - 1}
-                className="text-bone-dim hover:text-gold disabled:opacity-30 disabled:hover:text-bone-dim"
-              >
-                ↓ Xuống
-              </button>
-              <button
-                type="button"
-                onClick={() => onChange(value.filter((_, j) => j !== i))}
-                className="ml-auto text-red-400 hover:text-red-300"
-              >
-                Xoá dòng
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {value.length < 30 && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={value.length ? 'mt-4' : ''}
-          onClick={() => onChange([...value, { label: {}, value: {} }])}
-        >
-          + Thêm dòng
-        </Button>
-      )}
-    </fieldset>
   );
 }
