@@ -115,8 +115,14 @@ export default async function ModelDetailPage({
             ))}
           </dl>
 
+          {/* pre-line, not a plain <p>: the CMS field is a textarea, so the line
+              breaks someone typed there are the formatting they meant. HTML
+              would otherwise collapse every one of them into a space and run
+              the whole bio together as a single block. */}
           {bio ? (
-            <p className="mt-8 text-sm leading-relaxed text-bone-dim">{bio}</p>
+            <p className="mt-8 whitespace-pre-line text-sm leading-relaxed text-bone-dim">
+              {bio}
+            </p>
           ) : null}
 
           <div className="mt-8 hidden lg:block">

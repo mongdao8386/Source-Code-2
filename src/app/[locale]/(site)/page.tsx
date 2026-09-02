@@ -165,7 +165,7 @@ export default async function HomePage({
                   </Link>
 
                   {leadBio && (
-                    <p className="mt-5 line-clamp-4 max-w-[42ch] text-sm leading-relaxed text-bone-dim">
+                    <p className="mt-5 line-clamp-4 max-w-[42ch] whitespace-pre-line text-sm leading-relaxed text-bone-dim">
                       {leadBio}
                     </p>
                   )}
