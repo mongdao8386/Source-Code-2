@@ -35,9 +35,6 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
-# sharp rasterises the watermark from SVG text, and Alpine ships no fonts at
-# all — without these the tile renders as nothing and photos upload unmarked.
-RUN apk add --no-cache fontconfig ttf-dejavu
 RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 nextjs
 COPY --from=build /app/public ./public

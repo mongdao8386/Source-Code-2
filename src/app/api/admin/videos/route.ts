@@ -4,8 +4,6 @@ import { requireStaff } from '@/lib/auth/guards';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { audit } from '@/lib/audit';
-import { getSiteSettings } from '@/lib/queries/public';
-import { watermarkImage } from '@/lib/watermark';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -78,15 +76,10 @@ export async function POST(request: NextRequest) {
   let posterPath = '';
   if (poster instanceof File && poster.size > 0 && poster.size <= MAX_POSTER_BYTES) {
     try {
-      const frame = await sharp(Buffer.from(await poster.arrayBuffer()))
+      const webp = await sharp(Buffer.from(await poster.arrayBuffer()))
         .resize({ width: 1200, height: 1600, fit: 'inside', withoutEnlargement: true })
         .webp({ quality: 82 })
         .toBuffer();
-      // The poster is the still most likely to be lifted — it is what the
-      // listing shows — so it carries the mark too. The clip itself does not
-      // yet; that needs an overlay pass in the browser trimmer.
-      const { brand_name } = await getSiteSettings();
-      const webp = await watermarkImage(frame, brand_name);
       posterPath = `${modelId}/video-${stamp}-poster.webp`;
       const p = await admin.storage.from('models-public').upload(posterPath, webp, {
         contentType: 'image/webp',
