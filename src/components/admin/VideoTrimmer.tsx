@@ -177,7 +177,10 @@ export function VideoTrimmer({
       const fd = new FormData();
       fd.append('file', new File([blob], 'clip.mp4', { type: 'video/mp4' }));
       if (poster) fd.append('poster', new File([poster], 'poster.jpg', { type: 'image/jpeg' }));
-      fd.append('girlId', girlId);
+      // Field name is the API's, not this component's: /api/admin/videos reads
+      // `modelId` and writes the `model_id` column. Renaming the prop is local;
+      // renaming the wire would need the route and the schema to move too.
+      fd.append('modelId', girlId);
       fd.append('duration', String(span));
 
       const res = await fetch('/api/admin/videos', { method: 'POST', body: fd });
@@ -200,7 +203,7 @@ export function VideoTrimmer({
 
   async function remove() {
     if (!confirm('Xoá video của gái này?')) return;
-    const res = await fetch(`/api/admin/videos?girlId=${girlId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/videos?modelId=${girlId}`, { method: 'DELETE' });
     if (res.ok) router.refresh();
     else setErr('Xoá thất bại.');
   }

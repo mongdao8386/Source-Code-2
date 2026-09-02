@@ -42,7 +42,7 @@ export default async function EditModelPage({
       <section className="mb-12">
         <h2 className="kicker mb-4">Video giới thiệu</h2>
         <VideoTrimmer
-          modelId={model.id}
+          girlId={model.id}
           videoPath={model.video_path}
           posterPath={model.video_poster_path}
           duration={model.video_duration}
