@@ -171,7 +171,7 @@ export function DetailRows({
     <fieldset>
       <legend className="kicker mb-2">Thông tin chi tiết thêm</legend>
       <p className="mb-4 text-xs text-bone-faint">
-        Hiện dưới phần thông số trên trang người mẫu, theo đúng thứ tự ở đây.
+        Hiện dưới phần thông số trên trang gái, theo đúng thứ tự ở đây.
         Dòng để trống sẽ bị bỏ qua.
       </p>
 

@@ -1,7 +1,7 @@
 {
   "nav": {
-    "models": "Người mẫu",
-    "about": "Về chúng tôi",
+    "models": "Gái",
+    "about": "Giới thiệu",
     "guide": "Hướng dẫn",
     "terms": "Điều khoản",
     "book": "Đặt lịch",
@@ -10,22 +10,22 @@
     "language": "Ngôn ngữ"
   },
   "home": {
-    "eyebrow": "Studio · Casting",
-    "featuredTitle": "Gương mặt nổi bật",
-    "featuredMore": "Xem tất cả người mẫu",
+    "eyebrow": "Dịch vụ · Hẹn hò",
+    "featuredTitle": "Gái mới nhất",
+    "featuredMore": "Xem tất cả",
     "categoriesTitle": "Thể loại",
-    "testimonialsTitle": "Khách hàng nói gì",
-    "ctaTitle": "Sẵn sàng cho buổi chụp?",
-    "ctaBody": "Chọn người mẫu và trao đổi trực tiếp với chúng tôi qua Telegram.",
-    "ctaButton": "Đặt lịch qua Telegram"
+    "testimonialsTitle": "Khách đánh giá",
+    "ctaTitle": "Muốn hẹn ngay?",
+    "ctaBody": "Chọn gái và liên hệ trực tiếp qua Telegram để đặt lịch.",
+    "ctaButton": "Đặt qua Telegram"
   },
   "models": {
-    "title": "Người mẫu",
-    "subtitle": "Tuyển chọn gương mặt cho từng khung hình.",
+    "title": "Danh sách gái",
+    "subtitle": "Tuyển chọn gái xinh cho từng nhu cầu.",
     "filterAll": "Tất cả",
     "filterCity": "Thành phố",
     "filterCategory": "Thể loại",
-    "empty": "Chưa có người mẫu nào phù hợp.",
+    "empty": "Chưa có gái nào phù hợp.",
     "height": "Chiều cao",
     "experience": "Kinh nghiệm",
     "years": "năm",
@@ -34,7 +34,7 @@
     "showreel": "Video giới thiệu"
   },
   "booking": {
-    "cta": "Đặt lịch",
+    "cta": "Đặt ngay",
     "comingSoon": "Sắp ra mắt",
     "opensTelegram": "Mở Telegram trong tab mới"
   },
@@ -65,7 +65,7 @@
     "signOut": "Đăng xuất",
     "nav": {
       "dashboard": "Tổng quan",
-      "models": "Người mẫu",
+      "models": "Quản lý gái",
       "categories": "Thể loại",
       "pages": "Trang nội dung",
       "testimonials": "Đánh giá",

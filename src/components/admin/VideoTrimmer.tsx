@@ -28,12 +28,12 @@ function fmt(s: number) {
  * meaningful moment in-browser, so it does not pretend to.
  */
 export function VideoTrimmer({
-  modelId,
+  girlId,
   videoPath,
   posterPath,
   duration,
 }: {
-  modelId: string;
+  girlId: string;
   videoPath: string;
   posterPath: string;
   duration: number | null;
@@ -54,7 +54,6 @@ export function VideoTrimmer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const ffmpegRef = useRef<import('@ffmpeg/ffmpeg').FFmpeg | null>(null);
 
-  // Revoke the object URL when the picked file changes or the component goes.
   useEffect(() => {
     return () => {
       if (srcUrl) URL.revokeObjectURL(srcUrl);
@@ -78,7 +77,6 @@ export function VideoTrimmer({
     const d = v.duration;
     setSrcDuration(d);
 
-    // Propose a window that fits. Anything already short enough is taken whole.
     const suggestedEnd = Math.min(d, MAX_SECONDS);
     setStart(0);
     setEnd(suggestedEnd);
@@ -94,7 +92,6 @@ export function VideoTrimmer({
     if (v) v.currentTime = t;
   }, []);
 
-  /** Grabs the frame at `start` as a JPEG so the grid has a still to show. */
   async function grabPoster(): Promise<Blob | null> {
     const v = videoRef.current;
     if (!v || !v.videoWidth) return null;
@@ -120,9 +117,6 @@ export function VideoTrimmer({
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const ff = new FFmpeg();
     ff.on('progress', ({ progress: p }) => setProgress(Math.round(p * 100)));
-    // Self-hosted rather than pulled from a CDN: the CSP allows no external
-    // script origins, and a 32 MB dependency should not be a third party's
-    // uptime problem.
     await ff.load({
       coreURL: '/ffmpeg/ffmpeg-core.js',
       wasmURL: '/ffmpeg/ffmpeg-core.wasm',
@@ -151,8 +145,6 @@ export function VideoTrimmer({
       const inName = 'in' + (file.name.match(/\.[a-z0-9]+$/i)?.[0] ?? '.mp4');
       await ff.writeFile(inName, await fetchFile(file));
 
-      // Scale to at most 720p and cap the bitrate: the byte cap is what keeps
-      // egress predictable, and re-encoding is the only way to guarantee it.
       await ff.exec([
         '-ss', start.toFixed(2),
         '-t', span.toFixed(2),
@@ -185,7 +177,7 @@ export function VideoTrimmer({
       const fd = new FormData();
       fd.append('file', new File([blob], 'clip.mp4', { type: 'video/mp4' }));
       if (poster) fd.append('poster', new File([poster], 'poster.jpg', { type: 'image/jpeg' }));
-      fd.append('modelId', modelId);
+      fd.append('girlId', girlId);
       fd.append('duration', String(span));
 
       const res = await fetch('/api/admin/videos', { method: 'POST', body: fd });
@@ -207,8 +199,8 @@ export function VideoTrimmer({
   }
 
   async function remove() {
-    if (!confirm('Xoá video của người mẫu này?')) return;
-    const res = await fetch(`/api/admin/videos?modelId=${modelId}`, { method: 'DELETE' });
+    if (!confirm('Xoá video của gái này?')) return;
+    const res = await fetch(`/api/admin/videos?girlId=${girlId}`, { method: 'DELETE' });
     if (res.ok) router.refresh();
     else setErr('Xoá thất bại.');
   }
@@ -218,7 +210,6 @@ export function VideoTrimmer({
 
   return (
     <div className="space-y-4">
-      {/* Current clip */}
       {videoPath ? (
         <div className="flex flex-wrap items-start gap-4 border border-line p-3">
           <video
@@ -256,7 +247,6 @@ export function VideoTrimmer({
         </span>
       </div>
 
-      {/* Editor */}
       {srcUrl && (
         <div className="space-y-3 border border-line p-3">
           <video

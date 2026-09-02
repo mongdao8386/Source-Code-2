@@ -1063,10 +1063,10 @@ insert into public.site_settings (id, hero, announcement)
 values (
   true,
   jsonb_build_object(
-    'headline', jsonb_build_object('vi', 'Gương mặt cho khung hình của bạn', 'en', 'Faces for your frame'),
+    'headline', jsonb_build_object('vi', 'Gái xinh chờ bạn', 'en', 'Beautiful girls waiting'),
     'sub', jsonb_build_object(
-      'vi', 'Tuyển chọn người mẫu chụp ảnh chuyên nghiệp.',
-      'en', 'A curated roster of photographic models.'
+      'vi', 'Tuyển chọn gái xinh cho từng nhu cầu.',
+      'en', 'A curated selection of beautiful girls for your needs.'
     ),
     'image', ''
   ),
@@ -1075,16 +1075,13 @@ values (
 on conflict (id) do nothing;
 
 insert into public.categories (slug, name, sort_order) values
-  ('thoi-trang', jsonb_build_object('vi', 'Thời trang', 'en', 'Fashion'), 1),
-  ('beauty',     jsonb_build_object('vi', 'Beauty',     'en', 'Beauty'),  2),
-  ('ky-yeu',     jsonb_build_object('vi', 'Kỷ yếu',     'en', 'Yearbook'), 3),
-  ('su-kien',    jsonb_build_object('vi', 'Sự kiện',    'en', 'Events'),  4),
-  ('thuong-mai', jsonb_build_object('vi', 'Thương mại', 'en', 'Commercial'), 5)
+  ('tre-trung', jsonb_build_object('vi', 'Trẻ trung', 'en', 'Young'), 1),
+  ('trung-nien', jsonb_build_object('vi', 'Trung niên', 'en', 'Mature'), 2),
+  ('sinh-vien', jsonb_build_object('vi', 'Sinh viên', 'en', 'Student'), 3),
+  ('van-phong', jsonb_build_object('vi', 'Văn phòng', 'en', 'Office'), 4),
+  ('ky-nang', jsonb_build_object('vi', 'Kỹ năng', 'en', 'Skilled'), 5)
 on conflict (slug) do nothing;
 
--- Published on purpose: the header and footer always link to these three, so
--- shipping them as drafts would leave a fresh install 404-ing its own nav.
--- Replace the placeholder copy from the CMS (Trang nội dung).
 insert into public.pages (slug, title, body, status) values
   ('about',
    jsonb_build_object('vi', 'Về chúng tôi', 'en', 'About us'),
@@ -1096,6 +1093,6 @@ insert into public.pages (slug, title, body, status) values
    'published'),
   ('guide',
    jsonb_build_object('vi', 'Hướng dẫn', 'en', 'Guide'),
-   jsonb_build_object('vi', E'## Hướng dẫn đặt lịch\n\n1. Chọn người mẫu.\n2. Nhấn **Đặt lịch**.\n3. Trao đổi chi tiết qua Telegram.', 'en', E'## How to book\n\n1. Pick a model.\n2. Tap **Book**.\n3. Sort out the details on Telegram.'),
+   jsonb_build_object('vi', E'## Hướng dẫn đặt lịch\n\n1. Chọn gái.\n2. Nhấn **Đặt lịch**.\n3. Trao đổi chi tiết qua Telegram.', 'en', E'## How to book\n\n1. Pick a girl.\n2. Tap **Book**.\n3. Sort out the details on Telegram.'),
    'published')
 on conflict (slug) do nothing;

@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
     title: { default: `${name} — Model booking`, template: `%s · ${name}` },
-    description: 'Tuyển chọn người mẫu chụp ảnh chuyên nghiệp.',
+    description: 'Tuyển chọn gái đi khách chuyên nghiệp.',
     robots: { index: true, follow: true },
     icons: settings.favicon_path
       ? { icon: publicPhotoUrl(settings.favicon_path) }
