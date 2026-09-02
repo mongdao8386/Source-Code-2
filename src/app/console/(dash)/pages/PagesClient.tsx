@@ -6,6 +6,7 @@ import type { Page } from '@/lib/supabase/types';
 import { deletePageAction, upsertPageAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, Select, FormError } from '@/components/ui/Field';
+import { TranslateButton } from '@/components/admin/TranslateButton';
 
 const bag = (v: unknown): { vi?: string; en?: string } =>
   v && typeof v === 'object' ? (v as { vi?: string; en?: string }) : {};
@@ -145,7 +146,14 @@ function PageEditor({
           <Input value={f.titleVi} onChange={(e) => set({ titleVi: e.target.value })} />
         </div>
         <div>
-          <Label>Title EN</Label>
+          <div className="flex items-baseline justify-between gap-3">
+            <Label>Title EN</Label>
+            <TranslateButton
+              source={f.titleVi}
+              target={f.titleEn}
+              onResult={(titleEn) => set({ titleEn })}
+            />
+          </div>
           <Input value={f.titleEn} onChange={(e) => set({ titleEn: e.target.value })} />
         </div>
       </div>
@@ -156,7 +164,16 @@ function PageEditor({
           <Textarea rows={14} value={f.bodyVi} onChange={(e) => set({ bodyVi: e.target.value })} />
         </div>
         <div>
-          <Label>Body EN (markdown)</Label>
+          <div className="flex items-baseline justify-between gap-3">
+            <Label>Body EN (markdown)</Label>
+            {/* Markdown goes through DeepL as plain text: headings and lists
+                survive, but check links and bold before saving. */}
+            <TranslateButton
+              source={f.bodyVi}
+              target={f.bodyEn}
+              onResult={(bodyEn) => set({ bodyEn })}
+            />
+          </div>
           <Textarea rows={14} value={f.bodyEn} onChange={(e) => set({ bodyEn: e.target.value })} />
         </div>
       </div>

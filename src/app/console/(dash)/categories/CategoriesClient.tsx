@@ -6,6 +6,7 @@ import type { Category } from '@/lib/supabase/types';
 import { deleteCategoryAction, upsertCategoryAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, FormError } from '@/components/ui/Field';
+import { TranslateButton } from '@/components/admin/TranslateButton';
 
 const rec = (v: unknown): Record<string, string> =>
   v && typeof v === 'object' ? (v as Record<string, string>) : {};
@@ -61,7 +62,14 @@ export function CategoriesClient({ categories }: { categories: Category[] }) {
           <Input id="cv" value={draft.vi} onChange={(e) => setDraft({ ...draft, vi: e.target.value })} />
         </div>
         <div>
-          <Label htmlFor="ce">Tên EN</Label>
+          <div className="flex items-baseline justify-between gap-3">
+            <Label htmlFor="ce">Tên EN</Label>
+            <TranslateButton
+              source={draft.vi}
+              target={draft.en}
+              onResult={(en) => setDraft({ ...draft, en })}
+            />
+          </div>
           <Input id="ce" value={draft.en} onChange={(e) => setDraft({ ...draft, en: e.target.value })} />
         </div>
         <div>

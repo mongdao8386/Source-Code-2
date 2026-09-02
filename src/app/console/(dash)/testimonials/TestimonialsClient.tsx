@@ -6,6 +6,7 @@ import type { Testimonial } from '@/lib/supabase/types';
 import { deleteTestimonialAction, upsertTestimonialAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Textarea, FormError } from '@/components/ui/Field';
+import { TranslateButton } from '@/components/admin/TranslateButton';
 
 const bag = (v: unknown): { vi?: string; en?: string } =>
   v && typeof v === 'object' ? (v as { vi?: string; en?: string }) : {};
@@ -67,7 +68,10 @@ export function TestimonialsClient({ items }: { items: Testimonial[] }) {
             <Textarea rows={3} value={d.vi} onChange={(e) => set({ vi: e.target.value })} />
           </div>
           <div>
-            <Label>Quote EN</Label>
+            <div className="flex items-baseline justify-between gap-3">
+              <Label>Quote EN</Label>
+              <TranslateButton source={d.vi} target={d.en} onResult={(en) => set({ en })} />
+            </div>
             <Textarea rows={3} value={d.en} onChange={(e) => set({ en: e.target.value })} />
           </div>
         </div>

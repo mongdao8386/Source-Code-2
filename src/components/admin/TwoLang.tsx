@@ -1,7 +1,7 @@
 'use client';
 
 import { Input, Label, Textarea } from '@/components/ui/Field';
-import { useTranslate } from './useTranslate';
+import { TranslateButton } from './TranslateButton';
 
 export type Bag = { vi?: string; en?: string };
 
@@ -28,35 +28,19 @@ export function TwoLang({
   textarea?: boolean;
 }) {
   const C = textarea ? Textarea : Input;
-  const { translate, busy, err, available } = useTranslate();
 
   const vi = value.vi ?? '';
   const en = value.en ?? '';
-
-  async function fill() {
-    const out = await translate([vi]);
-    if (out) onChange({ ...value, en: out[0] ?? '' });
-  }
 
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
         <Label>{label}</Label>
-        {available && (
-          <button
-            type="button"
-            onClick={fill}
-            disabled={busy || !vi.trim() || en.trim() !== ''}
-            title={
-              en.trim() !== ''
-                ? 'Xoá ô EN trước nếu muốn dịch lại'
-                : 'Dịch nội dung tiếng Việt sang tiếng Anh'
-            }
-            className="text-[0.625rem] uppercase tracking-[0.14em] text-bone-dim transition-colors hover:text-gold disabled:opacity-30 disabled:hover:text-bone-dim"
-          >
-            {busy ? 'Đang dịch…' : 'Dịch → EN'}
-          </button>
-        )}
+        <TranslateButton
+          source={vi}
+          target={en}
+          onResult={(english) => onChange({ ...value, en: english })}
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -77,8 +61,6 @@ export function TwoLang({
           }
         />
       </div>
-
-      {err && <p className="mt-1 text-xs text-red-300">{err}</p>}
     </div>
   );
 }
