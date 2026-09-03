@@ -21,6 +21,17 @@ export const routing = defineRouting({
   locales,
   defaultLocale,
   localePrefix: 'always',
+  /**
+   * Vietnamese always, never the visitor's browser setting.
+   *
+   * With detection on — next-intl's default — the middleware reads
+   * `Accept-Language` and hands anyone whose phone is set to English the `/en`
+   * site, then writes a NEXT_LOCALE cookie that keeps them there for a year.
+   * This is a Vietnamese site with an English translation, not a site that
+   * guesses; `/` goes to `/vi` for everyone and the switcher is how you get
+   * to English.
+   */
+  localeDetection: false,
   // Localised path segments: canonical key on the left, per-locale slug on the right.
   pathnames: {
     '/': '/',

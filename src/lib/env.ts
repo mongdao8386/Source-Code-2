@@ -12,6 +12,9 @@ const clientSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
+  // Validated but not what decides routing: the default locale is
+  // `defaultLocale` in i18n/routing.ts, which the middleware reads. Setting
+  // this alone changes nothing about which language a visitor lands on.
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(['vi', 'en']).default('vi'),
 });
 
