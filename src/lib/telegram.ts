@@ -21,7 +21,12 @@ export type SupportContact = {
   /** Without the "@". */
   username: string;
   url: string;
+  /** Storage path of an uploaded avatar, or '' to fall back to the initial. */
+  avatarPath: string;
 };
+
+/** Only objects this app uploaded — the same rule the CMS enforces on save. */
+const UPLOADED = /^brand\/[a-z]+-[0-9a-f-]{36}\.(webp|png)$/;
 
 /** Telegram's own rule: 5–32 of a-z, 0-9 and underscore. */
 export const USERNAME_RE = /^[a-z][a-z0-9_]{4,31}$/i;
@@ -51,11 +56,18 @@ export function supportContacts(settings: { telegram_support?: unknown }): Suppo
   if (!Array.isArray(raw)) return [];
   const out: SupportContact[] = [];
   for (const item of raw.slice(0, 2)) {
-    const o = (item ?? {}) as { name?: unknown; username?: unknown };
+    const o = (item ?? {}) as { name?: unknown; username?: unknown; avatar_path?: unknown };
     const username = normalizeUsername(typeof o.username === 'string' ? o.username : '');
     if (!USERNAME_RE.test(username)) continue;
     const name = typeof o.name === 'string' ? o.name.trim() : '';
-    out.push({ n: (out.length + 1) as 1 | 2, name, username, url: usernameUrl(username) });
+    const avatar = typeof o.avatar_path === 'string' ? o.avatar_path.trim() : '';
+    out.push({
+      n: (out.length + 1) as 1 | 2,
+      name,
+      username,
+      url: usernameUrl(username),
+      avatarPath: UPLOADED.test(avatar) ? avatar : '',
+    });
   }
   return out;
 }

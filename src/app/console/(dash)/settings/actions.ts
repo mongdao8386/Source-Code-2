@@ -49,6 +49,7 @@ const schema = z.object({
         username: optionalText(80)
           .transform(normalizeUsername)
           .refine((v) => v === '' || USERNAME_RE.test(v), 'must be a Telegram username'),
+        avatar_path: storagePath,
       }),
     )
     .max(2)

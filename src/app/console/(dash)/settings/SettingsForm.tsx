@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import type { SiteSettings } from '@/lib/supabase/types';
 import { updateSettingsAction } from './actions';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +9,7 @@ import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
 import { TwoLang } from '@/components/admin/TwoLang';
 import { USERNAME_RE, normalizeUsername } from '@/lib/telegram';
+import { publicPhotoUrl } from '@/lib/storage';
 
 /**
  * The action already reports which field failed; the form used to throw that
@@ -228,17 +229,25 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   );
 }
 
-type SupportRow = { name: string; username: string };
+type SupportRow = { name: string; username: string; avatar_path: string };
 type SupportRows = [SupportRow, SupportRow];
+
+const UPLOAD_ERRORS: Record<string, string> = {
+  too_large: 'Ảnh nặng quá 5 MB.',
+  unsupported_type: 'Chỉ nhận JPEG, PNG hoặc WebP.',
+  decode_failed: 'Không đọc được ảnh — file có thể đã hỏng.',
+  unauthorized: 'Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi thử lại.',
+};
 
 /** jsonb in, two rows out — never fewer, so both boxes always render. */
 function readSupport(v: unknown): SupportRows {
   const arr = Array.isArray(v) ? v : [];
   const row = (k: number): SupportRow => {
-    const o = (arr[k] ?? {}) as { name?: unknown; username?: unknown };
+    const o = (arr[k] ?? {}) as { name?: unknown; username?: unknown; avatar_path?: unknown };
     return {
       name: typeof o.name === 'string' ? o.name : '',
       username: typeof o.username === 'string' ? o.username : '',
+      avatar_path: typeof o.avatar_path === 'string' ? o.avatar_path : '',
     };
   };
   return [row(0), row(1)];
@@ -261,9 +270,81 @@ function SupportField({
 }) {
   const username = normalizeUsername(value.username);
   const bad = username !== '' && !USERNAME_RE.test(username);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const initial = Array.from((value.name || `Hỗ trợ ${n}`).normalize('NFKC').trim())[0] ?? '';
+
+  async function upload(file: File | undefined) {
+    if (!file) return;
+    setErr(null);
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('kind', 'avatar');
+      const res = await fetch('/api/admin/brand', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (!res.ok) {
+        setErr(UPLOAD_ERRORS[json.error] ?? json.error ?? 'upload_failed');
+        return;
+      }
+      onChange({ ...value, avatar_path: json.path });
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }
+
   return (
     <div className="space-y-3 border border-line p-4">
       <p className="kicker">Hỗ trợ {n}</p>
+
+      <div className="flex items-center gap-4">
+        <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/50 bg-ink font-display text-2xl text-gold">
+          {value.avatar_path ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={publicPhotoUrl(value.avatar_path)} alt="" className="h-full w-full object-cover" />
+          ) : (
+            initial
+          )}
+        </span>
+        <div className="min-w-0">
+          <p className="kicker mb-2 text-[0.625rem]">Avatar</p>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={(e) => upload(e.target.files?.[0])}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => fileRef.current?.click()}
+            >
+              {busy ? '…' : value.avatar_path ? 'Đổi ảnh' : 'Tải ảnh'}
+            </Button>
+            {value.avatar_path && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => onChange({ ...value, avatar_path: '' })}
+              >
+                Xoá
+              </Button>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-bone-faint">
+            {err ? <span className="text-red-300">{err}</span> : 'Cắt vuông, hiện tròn. Không có thì hiện chữ cái đầu.'}
+          </p>
+        </div>
+      </div>
+
       <div>
         <Label htmlFor={`sn${n}`}>Tên hiển thị</Label>
         <Input

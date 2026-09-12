@@ -18,6 +18,9 @@ const KINDS = {
   // `object-cover` at `sizes="100vw"`, so it is cropped to a fixed frame here
   // rather than left at whatever aspect ratio the photographer handed over.
   hero: { w: 2000, h: 1250, fit: 'cover' as const, format: 'webp' as const },
+  // Support-staff avatar: drawn in a circle at 40–56px, so a small square is
+  // all that is ever needed.
+  avatar: { w: 320, h: 320, fit: 'cover' as const, format: 'webp' as const },
 };
 type Kind = keyof typeof KINDS;
 

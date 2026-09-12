@@ -27,9 +27,20 @@ describe('supportContacts', () => {
       ],
     });
     expect(c).toEqual([
-      { n: 1, name: 'Admin Nam', username: 'buomxoe_nam', url: 'https://t.me/buomxoe_nam' },
-      { n: 2, name: '', username: 'buomxoe_linh', url: 'https://t.me/buomxoe_linh' },
+      { n: 1, name: 'Admin Nam', username: 'buomxoe_nam', url: 'https://t.me/buomxoe_nam', avatarPath: '' },
+      { n: 2, name: '', username: 'buomxoe_linh', url: 'https://t.me/buomxoe_linh', avatarPath: '' },
     ]);
+  });
+
+  it('keeps an avatar only when it is a path this app uploaded', () => {
+    const ok = 'brand/avatar-11111111-1111-4111-8111-111111111111.webp';
+    const c = supportContacts({
+      telegram_support: [
+        { name: 'A', username: 'person_one', avatar_path: ok },
+        { name: 'B', username: 'person_two', avatar_path: 'https://evil.example/x.png' },
+      ],
+    });
+    expect(c.map((x) => x.avatarPath)).toEqual([ok, '']);
   });
 
   it('drops anything that is not a real username', () => {

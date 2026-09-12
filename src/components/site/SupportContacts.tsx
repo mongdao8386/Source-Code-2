@@ -2,7 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import type { SupportContact } from '@/lib/telegram';
+import { publicPhotoUrl } from '@/lib/storage';
 import { trackBooking } from '@/lib/track';
 import { cn } from '@/lib/cn';
 import { TelegramIcon } from './TelegramIcon';
@@ -38,7 +40,27 @@ export function SupportContacts({
 
   const onClick = () => trackBooking(modelId, locale);
   const nameOf = (c: SupportContact) => c.name || t('person', { n: c.n });
-  const initial = (c: SupportContact) => nameOf(c).trim().charAt(0).toUpperCase();
+
+  /**
+   * The avatar: an uploaded photo, else the first letter of the name. Names
+   * here arrive in Unicode fancy-script ("𝓑𝓸𝓸𝓴𝓲𝓷𝓰", "ⓆⓉⓋ"); NFKC folds those
+   * back to plain letters, and Array.from takes a whole code point rather
+   * than half of a surrogate pair.
+   */
+  const initial = (c: SupportContact) =>
+    (Array.from(nameOf(c).normalize('NFKC').trim())[0] ?? '').toUpperCase();
+  const Avatar = ({ c, size }: { c: SupportContact; size: number }) =>
+    c.avatarPath ? (
+      <Image
+        src={publicPhotoUrl(c.avatarPath)}
+        alt=""
+        width={size}
+        height={size}
+        className="h-full w-full object-cover"
+      />
+    ) : (
+      <>{initial(c)}</>
+    );
 
   if (variant === 'cards') {
     return (
@@ -53,8 +75,8 @@ export function SupportContacts({
               className="group flex h-full flex-col gap-6 border border-line-strong bg-ink/60 p-6 text-left transition-colors duration-500 ease-lux hover:border-gold hover:bg-gold/5"
             >
               <span className="flex items-center gap-4">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-gold/50 bg-surface-1 font-display text-2xl text-gold transition-colors group-hover:bg-gold group-hover:text-ink">
-                  {initial(c)}
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold/50 bg-surface-1 font-display text-2xl text-gold transition-colors group-hover:border-gold">
+                  <Avatar c={c} size={56} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="kicker block text-[0.6rem]">{t('person', { n: c.n })}</span>
@@ -109,8 +131,8 @@ export function SupportContacts({
             onClick={onClick}
             className="group flex items-center gap-4 py-3.5"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line-strong bg-surface-1 font-display text-base text-gold transition-colors group-hover:border-gold group-hover:bg-gold group-hover:text-ink">
-              {initial(c)}
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line-strong bg-surface-1 font-display text-base text-gold transition-colors group-hover:border-gold">
+              <Avatar c={c} size={40} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm text-bone transition-colors group-hover:text-gold">
