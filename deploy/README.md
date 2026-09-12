@@ -32,8 +32,18 @@ supabase/migrations/20260901000000_schema.sql
 ```
 
 It is idempotent — schema, RLS, triggers, storage buckets, column grants and
-starter data — so it is safe on an empty project and safe to re-run. Then
-create the single owner account, which needs the service-role key because it
+starter data — so it is safe on an empty project and safe to re-run.
+
+Later changes arrive as further files in `supabase/migrations/`. Apply each
+new one the same way (SQL Editor) or with `npx supabase db push` from a
+machine that has `SUPABASE_ACCESS_TOKEN` set — the deploy workflow does not
+run migrations. Pending right now:
+
+```
+supabase/migrations/20260912000000_telegram_support.sql   # second Telegram channel
+```
+
+Then create the single owner account, which needs the service-role key because it
 has to write an `auth.users` row:
 
 ```bash

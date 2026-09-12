@@ -28,6 +28,7 @@ export const getSiteSettings = cache(async (): Promise<PublicSiteSettings> => {
   return (
     data ?? {
       telegram_channel_url: '',
+      telegram_support_url: '',
       socials: {},
       hero: {},
       announcement: {},
@@ -54,9 +55,9 @@ export const getCategories = cache(async (): Promise<Category[]> => {
 export type ModelListItem = Model & { cover: ModelPhoto | null };
 
 export const getPublishedModels = cache(
-  async (opts: { category?: string; city?: string; limit?: number } = {}): Promise<
-    ModelListItem[]
-  > => {
+  async (
+    opts: { category?: string; city?: string; q?: string; limit?: number } = {},
+  ): Promise<ModelListItem[]> => {
     const supabase = createAnonClient();
     let query = supabase
       .from('models')
@@ -66,6 +67,11 @@ export const getPublishedModels = cache(
       .order('published_at', { ascending: false });
 
     if (opts.city) query = query.eq('city', opts.city);
+    // Name search. PostgREST treats `%`, `_` and `\` as pattern syntax and a
+    // stray comma as a filter separator, so the term is cleaned before it is
+    // wrapped — a visitor typing punctuation gets no matches, not an error.
+    const q = (opts.q ?? '').replace(/[%_\\,]/g, ' ').trim().slice(0, 60);
+    if (q) query = query.ilike('stage_name', `%${q}%`);
     if (opts.limit) query = query.limit(opts.limit);
 
     const { data, error } = await query;

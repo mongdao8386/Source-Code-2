@@ -4,7 +4,9 @@ import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { AnnouncementBar } from '@/components/site/AnnouncementBar';
 import { MaintenanceScreen } from '@/components/site/MaintenanceScreen';
+import { SupportFab } from '@/components/site/SupportFab';
 import { getSiteSettings } from '@/lib/queries/public';
+import { primaryTelegram, supportChannels } from '@/lib/telegram';
 
 export default async function SiteLayout({
   children,
@@ -21,18 +23,22 @@ export default async function SiteLayout({
     return <MaintenanceScreen brandName={settings.brand_name} />;
   }
 
+  const channels = supportChannels(settings);
+
   return (
     <div className="flex min-h-dvh flex-col">
       {/* The header is fixed so the hero runs full-bleed under it; every page
           therefore carries its own top padding rather than relying on flow. */}
       <AnnouncementBar settings={settings} />
       <SiteHeader
-        telegramUrl={settings.telegram_channel_url}
+        telegramUrl={primaryTelegram(settings)}
+        channels={channels}
         brandName={settings.brand_name}
         logoPath={settings.logo_path}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <SupportFab channels={channels} />
     </div>
   );
 }

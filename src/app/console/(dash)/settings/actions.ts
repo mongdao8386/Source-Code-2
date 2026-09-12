@@ -38,6 +38,7 @@ const storagePath = optionalText(300).refine(
 
 const schema = z.object({
   telegram_channel_url: urlOrEmpty,
+  telegram_support_url: urlOrEmpty,
   brand_name: z.string().trim().min(1).max(40).default('STUDIO'),
   logo_path: storagePath,
   favicon_path: storagePath,

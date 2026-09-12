@@ -2,13 +2,19 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Container } from '@/components/ui/Container';
 import { Brand } from '@/components/site/Brand';
+import { SupportChannels } from '@/components/site/SupportChannels';
 import { getSiteSettings } from '@/lib/queries/public';
+import { supportChannels } from '@/lib/telegram';
 
 export async function SiteFooter() {
-  const t = await getTranslations('footer');
-  const nav = await getTranslations('nav');
-  const settings = await getSiteSettings();
+  const [t, nav, support, settings] = await Promise.all([
+    getTranslations('footer'),
+    getTranslations('nav'),
+    getTranslations('support'),
+    getSiteSettings(),
+  ]);
   const year = new Date().getFullYear();
+  const channels = supportChannels(settings);
 
   const links = [
     { href: '/models', label: nav('models') },
@@ -22,32 +28,40 @@ export async function SiteFooter() {
       {/* Oversized wordmark — the closing beat, matching the hero's scale. */}
       <Container className="py-16 md:py-24">
         <p className="text-mega leading-[0.8] tracking-[-0.05em] text-surface-2">
-          <Brand
-            name={settings.brand_name}
-            dotClassName="text-gold/30"
-          />
+          <Brand name={settings.brand_name} dotClassName="text-gold/30" />
         </p>
       </Container>
 
-      <Container className="pad-safe-bottom flex flex-col gap-8 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
-        <nav className="flex flex-wrap gap-x-8 gap-y-3">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="tap-safe link-wipe text-[0.6875rem] uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex flex-col gap-1 text-[0.6875rem] uppercase tracking-[0.18em] text-bone-faint md:items-end">
-          <span>{t('built')}</span>
-          <span>
-            &copy; {year} {settings.brand_name}. {t('rights')}
-          </span>
+      <Container className="grid gap-12 border-t border-line py-12 md:grid-cols-[1fr_minmax(0,22rem)] md:gap-16">
+        <div>
+          <p className="kicker">{settings.brand_name}</p>
+          <nav className="mt-5 flex flex-wrap gap-x-8 gap-y-3">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="tap-safe link-wipe text-[0.6875rem] uppercase tracking-[0.22em] text-bone-dim hover:text-bone"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </div>
+
+        {channels.length > 0 && (
+          <div>
+            <p className="kicker text-gold">{t('support')}</p>
+            <p className="mt-2 text-xs leading-relaxed text-bone-faint">{support('body')}</p>
+            <SupportChannels channels={channels} variant="list" className="mt-4" />
+          </div>
+        )}
+      </Container>
+
+      <Container className="pad-safe-bottom flex flex-col gap-2 border-t border-line py-6 text-[0.6875rem] uppercase tracking-[0.18em] text-bone-faint md:flex-row md:items-center md:justify-between">
+        <span>{t('built')}</span>
+        <span>
+          &copy; {year} {settings.brand_name}. {t('rights')}
+        </span>
       </Container>
     </footer>
   );

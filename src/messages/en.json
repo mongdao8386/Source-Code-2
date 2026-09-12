@@ -7,7 +7,8 @@
     "book": "Book",
     "menu": "Menu",
     "close": "Close",
-    "language": "Language"
+    "language": "Language",
+    "online": "Online 24/7"
   },
   "home": {
     "eyebrow": "Studio · Casting",
@@ -17,7 +18,27 @@
     "testimonialsTitle": "What clients say",
     "ctaTitle": "Ready to shoot?",
     "ctaBody": "Pick a model and talk to us directly on Telegram.",
-    "ctaButton": "Book on Telegram"
+    "ctaButton": "Book on Telegram",
+    "statModels": "models",
+    "statCategories": "categories",
+    "statSupport": "24/7 support on Telegram",
+    "stepsTitle": "Book in three steps",
+    "step1Title": "Pick a model",
+    "step1Body": "Photos, measurements, area and rate are right on the profile.",
+    "step2Title": "Message on Telegram",
+    "step2Body": "Tap Book, send the model's name and the time you want.",
+    "step3Title": "Confirm",
+    "step3Body": "Support replies within minutes, confirms the slot and takes it from there.",
+    "heroNote": "Just updated",
+    "trustTitle": "Our promise",
+    "trust1Title": "Clear profiles",
+    "trust1Body": "Photos, measurements, area and rate, right on every profile.",
+    "trust2Title": "24/7 support",
+    "trust2Body": "Two Telegram channels; someone always answers.",
+    "trust3Title": "Discreet",
+    "trust3Body": "No account, no client details kept.",
+    "trust4Title": "Fast confirmation",
+    "trust4Body": "Slots confirmed in minutes, with clear next steps."
   },
   "models": {
     "title": "Models",
@@ -31,7 +52,16 @@
     "years": "yrs",
     "measurements": "Measurements",
     "city": "Area",
-    "showreel": "Showreel"
+    "showreel": "Showreel",
+    "search": "Search by name",
+    "searchPlaceholder": "Type a name…",
+    "searchButton": "Search",
+    "clear": "Clear filters",
+    "more": "More models",
+    "new": "New",
+    "viewProfile": "View profile",
+    "price": "Rate",
+    "from": "from"
   },
   "booking": {
     "cta": "Book",
@@ -41,7 +71,8 @@
   "footer": {
     "rights": "All rights reserved.",
     "contact": "Contact",
-    "built": "Designed by Studio"
+    "built": "Designed by Studio",
+    "support": "Support"
   },
   "notFound": {
     "title": "Page not found",
@@ -73,5 +104,15 @@
       "users": "Users",
       "audit": "Audit log"
     }
+  },
+  "support": {
+    "title": "Support on Telegram",
+    "body": "Message either channel below. Both take bookings.",
+    "channel": "Telegram {n}",
+    "primary": "Main channel",
+    "backup": "Backup channel",
+    "open": "Open Telegram",
+    "fab": "Contact on Telegram",
+    "close": "Close"
   }
 }

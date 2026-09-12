@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/cn';
 import { buttonClass } from '@/components/ui/Button';
+import { trackBooking } from '@/lib/track';
+import { TelegramIcon } from './TelegramIcon';
 
 /**
  * The single conversion action. Opens the shared Telegram channel in a new
@@ -30,13 +32,7 @@ export function BookingButton({
   const disabled = !telegramUrl;
 
   function handleClick() {
-    // fire-and-forget; never blocks navigation
-    void fetch('/api/track/booking', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ modelId: modelId ?? null, locale }),
-      keepalive: true,
-    }).catch(() => {});
+    trackBooking(modelId, locale);
   }
 
   if (disabled) {
@@ -59,6 +55,7 @@ export function BookingButton({
       title={tr('opensTelegram')}
       className={cn(buttonClass(variant, size), className)}
     >
+      <TelegramIcon size={size === 'sm' ? 12 : 14} />
       {label ?? tr('cta')}
       <svg
         width="13"

@@ -6,6 +6,8 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitch } from '@/components/site/LocaleSwitch';
 import { BookingButton } from '@/components/site/BookingButton';
 import { Brand } from '@/components/site/Brand';
+import { SupportChannels } from '@/components/site/SupportChannels';
+import type { TelegramChannel } from '@/lib/telegram';
 import { cn } from '@/lib/cn';
 
 const links = [
@@ -16,10 +18,12 @@ const links = [
 
 export function SiteHeader({
   telegramUrl,
+  channels,
   brandName,
   logoPath,
 }: {
   telegramUrl: string;
+  channels: TelegramChannel[];
   brandName: string;
   logoPath: string;
 }) {
@@ -48,9 +52,16 @@ export function SiteHeader({
     <header
       className={cn(
         'pad-safe-top fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-lux',
-        scrolled || open
-          ? 'border-b border-line bg-ink/85 backdrop-blur-md'
-          : 'border-b border-transparent bg-transparent',
+        // No backdrop-filter while the menu is open. A filter makes the header
+        // the containing block for its fixed descendants, and the menu panel
+        // below is one: its `top` and `bottom` then resolve against a 64px
+        // header instead of the viewport, giving it a height of zero and
+        // leaving the page showing through where the menu should be.
+        open
+          ? 'border-b border-line bg-ink'
+          : scrolled
+            ? 'border-b border-line bg-ink/85 backdrop-blur-md'
+            : 'border-b border-transparent bg-transparent',
       )}
     >
       <div className="gutter-safe mx-auto flex h-16 w-full max-w-[82rem] items-center justify-between">
@@ -81,6 +92,12 @@ export function SiteHeader({
             </Link>
           ))}
           <LocaleSwitch />
+          {channels.length > 0 && (
+            <span className="flex items-center gap-2 text-[0.625rem] uppercase tracking-[0.2em] text-bone-dim">
+              <span className="pulse-dot" aria-hidden />
+              {t('online')}
+            </span>
+          )}
           <BookingButton telegramUrl={telegramUrl} size="sm" label={t('book')} />
         </nav>
 
@@ -138,9 +155,12 @@ export function SiteHeader({
               </Link>
             ))}
           </nav>
-          <div className="mt-10 flex items-center justify-between">
-            <LocaleSwitch />
-            <BookingButton telegramUrl={telegramUrl} label={t('book')} />
+          <div className="mt-10 space-y-6">
+            <SupportChannels channels={channels} variant="inline" />
+            <div className="flex items-center justify-between">
+              <LocaleSwitch />
+              <BookingButton telegramUrl={telegramUrl} label={t('book')} />
+            </div>
           </div>
         </div>
       </div>

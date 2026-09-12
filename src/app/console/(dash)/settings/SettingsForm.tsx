@@ -8,6 +8,7 @@ import { Input, Label, FormError } from '@/components/ui/Field';
 import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
 import { TwoLang } from '@/components/admin/TwoLang';
+import { telegramHandle } from '@/lib/telegram';
 
 /**
  * The action already reports which field failed; the form used to throw that
@@ -15,7 +16,8 @@ import { TwoLang } from '@/components/admin/TwoLang';
  * dozen inputs. Name them instead.
  */
 const FIELD_LABELS: Record<string, string> = {
-  telegram_channel_url: 'Telegram channel URL',
+  telegram_channel_url: 'Telegram 1',
+  telegram_support_url: 'Telegram 2',
   brand_name: 'Tên site',
   logo_path: 'Logo',
   favicon_path: 'Favicon',
@@ -48,6 +50,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
 
   const [form, setForm] = useState({
     telegram_channel_url: settings.telegram_channel_url ?? '',
+    telegram_support_url: settings.telegram_support_url ?? '',
     brand_name: settings.brand_name ?? 'STUDIO',
     logo_path: settings.logo_path ?? '',
     favicon_path: settings.favicon_path ?? '',
@@ -74,6 +77,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
     start(async () => {
       const res = await updateSettingsAction({
         telegram_channel_url: form.telegram_channel_url,
+        telegram_support_url: form.telegram_support_url,
         brand_name: form.brand_name,
         logo_path: form.logo_path,
         favicon_path: form.favicon_path,
@@ -110,18 +114,25 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       />
 
       <section className="space-y-4">
-        <h2 className="kicker">Booking</h2>
-        <div>
-          <Label htmlFor="tg">Telegram channel URL</Label>
-          <Input
-            id="tg"
+        <h2 className="kicker">Telegram hỗ trợ</h2>
+        <p className="text-xs text-bone-faint">
+          Hai kênh Telegram là toàn bộ liên hệ của site. Cả hai hiện ở trang chủ,
+          trang người mẫu, chân trang và nút Telegram nổi. Nút “Đặt lịch” mở
+          kênh 1; nếu kênh 1 trống thì mở kênh 2.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TelegramField
+            id="tg1"
+            label="Telegram 1 · chính"
             value={form.telegram_channel_url}
-            onChange={(e) => set({ telegram_channel_url: e.target.value })}
-            placeholder="https://t.me/your_channel"
+            onChange={(v) => set({ telegram_channel_url: v })}
           />
-          <p className="mt-1 text-xs text-bone-faint">
-            Nút “Đặt lịch” trên toàn site sẽ mở link này. Để trống = nút bị vô hiệu hoá.
-          </p>
+          <TelegramField
+            id="tg2"
+            label="Telegram 2 · dự phòng"
+            value={form.telegram_support_url}
+            onChange={(v) => set({ telegram_support_url: v })}
+          />
         </div>
       </section>
 
@@ -139,9 +150,14 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         />
       </section>
 
-      <section className="space-y-4">
-        <h2 className="kicker">Contact & socials</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+      {/* Kept for the data already stored, but tucked away: nothing on the
+          public site reads these — support is the two Telegram channels. */}
+      <details className="group border border-line p-4">
+        <summary className="kicker cursor-pointer list-none">
+          <span className="mr-2 inline-block transition-transform group-open:rotate-90">›</span>
+          Liên hệ khác (không hiện trên site)
+        </summary>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="ce">Contact email</Label>
             <Input id="ce" value={form.contact_email} onChange={(e) => set({ contact_email: e.target.value })} />
@@ -163,7 +179,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             <Input id="tt" value={form.tt} onChange={(e) => set({ tt: e.target.value })} />
           </div>
         </div>
-      </section>
+      </details>
 
       <section className="space-y-4">
         <h2 className="kicker">Announcement</h2>
@@ -198,3 +214,41 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   );
 }
 
+/**
+ * One Telegram URL with the handle it resolves to shown underneath, so a typo
+ * in the link is visible before it is saved rather than after a client taps
+ * a dead button.
+ */
+function TelegramField({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const handle = telegramHandle(value);
+  const looksWrong = value.trim() !== '' && !/^https:\/\/(t\.me|telegram\.me)\//i.test(value.trim());
+  return (
+    <div>
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="https://t.me/ten_kenh"
+        className={looksWrong ? 'border-red-500/70' : undefined}
+      />
+      <p className={'mt-1 text-xs ' + (looksWrong ? 'text-red-300' : 'text-bone-faint')}>
+        {looksWrong
+          ? 'Link Telegram thường có dạng https://t.me/…'
+          : handle
+            ? `Hiện trên site là ${handle}`
+            : 'Để trống nếu chưa dùng.'}
+      </p>
+    </div>
+  );
+}

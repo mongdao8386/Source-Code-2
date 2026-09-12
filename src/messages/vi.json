@@ -7,7 +7,8 @@
     "book": "Đặt lịch",
     "menu": "Menu",
     "close": "Đóng",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "online": "Online 24/7"
   },
   "home": {
     "eyebrow": "Dịch vụ · Hẹn hò",
@@ -17,7 +18,27 @@
     "testimonialsTitle": "Khách đánh giá",
     "ctaTitle": "Muốn hẹn ngay?",
     "ctaBody": "Chọn gái và liên hệ trực tiếp qua Telegram để đặt lịch.",
-    "ctaButton": "Đặt qua Telegram"
+    "ctaButton": "Đặt qua Telegram",
+    "statModels": "gái",
+    "statCategories": "thể loại",
+    "statSupport": "Hỗ trợ 24/7 qua Telegram",
+    "stepsTitle": "Đặt lịch chỉ 3 bước",
+    "step1Title": "Chọn gái",
+    "step1Body": "Xem ảnh, số đo, khu vực và giá ngay trên hồ sơ.",
+    "step2Title": "Nhắn Telegram",
+    "step2Body": "Bấm Đặt lịch, gửi tên gái và khung giờ bạn muốn.",
+    "step3Title": "Xác nhận",
+    "step3Body": "Hỗ trợ trả lời trong vài phút, chốt lịch và hướng dẫn tiếp.",
+    "heroNote": "Mới cập nhật",
+    "trustTitle": "Cam kết",
+    "trust1Title": "Hồ sơ rõ ràng",
+    "trust1Body": "Ảnh, số đo, khu vực và giá ghi đúng trên từng hồ sơ.",
+    "trust2Title": "Hỗ trợ 24/7",
+    "trust2Body": "Hai kênh Telegram, nhắn là có người trả lời.",
+    "trust3Title": "Kín đáo",
+    "trust3Body": "Không cần tài khoản, không lưu thông tin khách.",
+    "trust4Title": "Xác nhận nhanh",
+    "trust4Body": "Chốt lịch trong vài phút, hướng dẫn rõ từng bước."
   },
   "models": {
     "title": "Danh sách gái",
@@ -31,7 +52,16 @@
     "years": "năm",
     "measurements": "Số đo",
     "city": "Khu vực",
-    "showreel": "Video giới thiệu"
+    "showreel": "Video giới thiệu",
+    "search": "Tìm theo tên",
+    "searchPlaceholder": "Nhập tên…",
+    "searchButton": "Tìm",
+    "clear": "Xoá lọc",
+    "more": "Gái khác",
+    "new": "Mới",
+    "viewProfile": "Xem hồ sơ",
+    "price": "Giá",
+    "from": "từ"
   },
   "booking": {
     "cta": "Đặt ngay",
@@ -41,7 +71,8 @@
   "footer": {
     "rights": "Đã đăng ký bản quyền.",
     "contact": "Liên hệ",
-    "built": "Thiết kế bởi Studio"
+    "built": "Thiết kế bởi Studio",
+    "support": "Hỗ trợ"
   },
   "notFound": {
     "title": "Không tìm thấy trang",
@@ -73,5 +104,15 @@
       "users": "Người dùng",
       "audit": "Nhật ký"
     }
+  },
+  "support": {
+    "title": "Hỗ trợ qua Telegram",
+    "body": "Nhắn cho một trong hai kênh dưới đây. Kênh nào cũng đặt lịch được.",
+    "channel": "Telegram {n}",
+    "primary": "Kênh chính",
+    "backup": "Kênh dự phòng",
+    "open": "Mở Telegram",
+    "fab": "Liên hệ Telegram",
+    "close": "Đóng"
   }
 }
