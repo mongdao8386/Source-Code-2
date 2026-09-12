@@ -257,6 +257,81 @@
     }
   }
 
+  /* The gold button. A flat fill read as a form control; a slight vertical
+     gradient and a coloured shadow make it read as the thing to press. Both
+     are derived from the accent so a re-coloured site keeps them. */
+  .btn-gold {
+    background-image: linear-gradient(180deg, var(--color-gold-bright), var(--color-gold));
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--color-gold-bright) 70%, transparent) inset,
+      0 12px 32px -12px color-mix(in srgb, var(--color-gold) 75%, transparent);
+    transition:
+      box-shadow 0.5s var(--ease-lux),
+      transform 0.5s var(--ease-lux),
+      filter 0.5s var(--ease-lux);
+  }
+  .btn-gold:hover {
+    filter: brightness(1.06);
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--color-gold-bright) 80%, transparent) inset,
+      0 18px 40px -12px color-mix(in srgb, var(--color-gold) 90%, transparent);
+  }
+
+  /* Ambient gold light behind a focal element — the hero portraits, the
+     lead card, the closing headline. */
+  .glow-gold {
+    position: relative;
+  }
+  .glow-gold::before {
+    content: '';
+    position: absolute;
+    inset: -12%;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      color-mix(in srgb, var(--color-gold) 22%, transparent),
+      transparent 72%
+    );
+    filter: blur(32px);
+  }
+
+  /* Hairline drawn just outside a portrait, the way a mount sits around a
+     print. */
+  .frame-gold {
+    outline: 1px solid color-mix(in srgb, var(--color-gold) 40%, transparent);
+    outline-offset: 6px;
+  }
+
+  /* "Online" indicator. */
+  .pulse-dot {
+    position: relative;
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: #4ade80;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 1px solid #4ade80;
+    animation: pulse-ring 1.8s var(--ease-swift) infinite;
+  }
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
   /* Slow drift for the hero backdrop when no image is set, so the
      empty state still looks deliberate rather than blank. */
   .aurora {

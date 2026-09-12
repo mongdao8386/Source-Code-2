@@ -10,7 +10,7 @@ const base =
   'select-none disabled:pointer-events-none disabled:opacity-40';
 
 const variants: Record<Variant, string> = {
-  solid: 'bg-gold text-ink hover:bg-gold-bright active:translate-y-px',
+  solid: 'btn-gold text-ink active:translate-y-px',
   outline:
     'border border-line-strong text-bone hover:border-gold hover:text-gold ' +
     'hover:bg-gold/5',
