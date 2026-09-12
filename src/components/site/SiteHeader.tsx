@@ -6,8 +6,8 @@ import { Link, usePathname } from '@/i18n/navigation';
 import { LocaleSwitch } from '@/components/site/LocaleSwitch';
 import { BookingButton } from '@/components/site/BookingButton';
 import { Brand } from '@/components/site/Brand';
-import { SupportChannels } from '@/components/site/SupportChannels';
-import type { TelegramChannel } from '@/lib/telegram';
+import { SupportContacts } from '@/components/site/SupportContacts';
+import type { SupportContact } from '@/lib/telegram';
 import { cn } from '@/lib/cn';
 
 const links = [
@@ -18,12 +18,12 @@ const links = [
 
 export function SiteHeader({
   telegramUrl,
-  channels,
+  contacts,
   brandName,
   logoPath,
 }: {
   telegramUrl: string;
-  channels: TelegramChannel[];
+  contacts: SupportContact[];
   brandName: string;
   logoPath: string;
 }) {
@@ -92,7 +92,7 @@ export function SiteHeader({
             </Link>
           ))}
           <LocaleSwitch />
-          {channels.length > 0 && (
+          {contacts.length > 0 && (
             <span className="flex items-center gap-2 text-[0.625rem] uppercase tracking-[0.2em] text-bone-dim">
               <span className="pulse-dot" aria-hidden />
               {t('online')}
@@ -156,7 +156,7 @@ export function SiteHeader({
             ))}
           </nav>
           <div className="mt-10 space-y-6">
-            <SupportChannels channels={channels} variant="inline" />
+            <SupportContacts contacts={contacts} variant="inline" />
             <div className="flex items-center justify-between">
               <LocaleSwitch />
               <BookingButton telegramUrl={telegramUrl} label={t('book')} />

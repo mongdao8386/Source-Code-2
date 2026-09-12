@@ -40,7 +40,7 @@ machine that has `SUPABASE_ACCESS_TOKEN` set — the deploy workflow does not
 run migrations. Pending right now:
 
 ```
-supabase/migrations/20260912000000_telegram_support.sql   # second Telegram channel
+supabase/migrations/20260912120000_telegram_support_users.sql   # two support accounts
 ```
 
 Then create the single owner account, which needs the service-role key because it

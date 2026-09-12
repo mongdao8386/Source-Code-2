@@ -6,7 +6,7 @@ import { AnnouncementBar } from '@/components/site/AnnouncementBar';
 import { MaintenanceScreen } from '@/components/site/MaintenanceScreen';
 import { SupportFab } from '@/components/site/SupportFab';
 import { getSiteSettings } from '@/lib/queries/public';
-import { primaryTelegram, supportChannels } from '@/lib/telegram';
+import { supportContacts } from '@/lib/telegram';
 
 export default async function SiteLayout({
   children,
@@ -23,7 +23,7 @@ export default async function SiteLayout({
     return <MaintenanceScreen brandName={settings.brand_name} />;
   }
 
-  const channels = supportChannels(settings);
+  const contacts = supportContacts(settings);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -31,14 +31,14 @@ export default async function SiteLayout({
           therefore carries its own top padding rather than relying on flow. */}
       <AnnouncementBar settings={settings} />
       <SiteHeader
-        telegramUrl={primaryTelegram(settings)}
-        channels={channels}
+        telegramUrl={settings.telegram_channel_url}
+        contacts={contacts}
         brandName={settings.brand_name}
         logoPath={settings.logo_path}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      <SupportFab channels={channels} />
+      <SupportFab contacts={contacts} />
     </div>
   );
 }

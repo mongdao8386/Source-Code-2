@@ -34,7 +34,7 @@
     "trust1Title": "Hồ sơ rõ ràng",
     "trust1Body": "Ảnh, số đo, khu vực và giá ghi đúng trên từng hồ sơ.",
     "trust2Title": "Hỗ trợ 24/7",
-    "trust2Body": "Hai kênh Telegram, nhắn là có người trả lời.",
+    "trust2Body": "Hai bạn hỗ trợ trên Telegram, nhắn là có người trả lời.",
     "trust3Title": "Kín đáo",
     "trust3Body": "Không cần tài khoản, không lưu thông tin khách.",
     "trust4Title": "Xác nhận nhanh",
@@ -107,12 +107,10 @@
   },
   "support": {
     "title": "Hỗ trợ qua Telegram",
-    "body": "Nhắn cho một trong hai kênh dưới đây. Kênh nào cũng đặt lịch được.",
-    "channel": "Telegram {n}",
-    "primary": "Kênh chính",
-    "backup": "Kênh dự phòng",
-    "open": "Mở Telegram",
-    "fab": "Liên hệ Telegram",
+    "body": "Nhắn trực tiếp cho một trong hai bạn hỗ trợ dưới đây.",
+    "person": "Hỗ trợ {n}",
+    "message": "Nhắn tin",
+    "fab": "Liên hệ hỗ trợ",
     "close": "Đóng"
   }
 }

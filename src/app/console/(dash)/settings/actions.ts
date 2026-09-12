@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { cmsAction, i18nString } from '@/lib/cms/action';
+import { USERNAME_RE, normalizeUsername } from '@/lib/telegram';
 
 /**
  * Optional free text.
@@ -38,7 +39,21 @@ const storagePath = optionalText(300).refine(
 
 const schema = z.object({
   telegram_channel_url: urlOrEmpty,
-  telegram_support_url: urlOrEmpty,
+  // Two staff accounts. "@nam", "t.me/nam" and "nam" all normalise to the
+  // username; an invite link does not, and is refused with itself in the
+  // message so the operator sees what was wrong. Blank rows are dropped.
+  telegram_support: z
+    .array(
+      z.object({
+        name: optionalText(40),
+        username: optionalText(80)
+          .transform(normalizeUsername)
+          .refine((v) => v === '' || USERNAME_RE.test(v), 'must be a Telegram username'),
+      }),
+    )
+    .max(2)
+    .default([])
+    .transform((rows) => rows.filter((r) => r.username)),
   brand_name: z.string().trim().min(1).max(40).default('STUDIO'),
   logo_path: storagePath,
   favicon_path: storagePath,

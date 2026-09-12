@@ -3,18 +3,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams, usePathname } from 'next/navigation';
-import type { TelegramChannel } from '@/lib/telegram';
+import type { SupportContact } from '@/lib/telegram';
 import { trackBooking } from '@/lib/track';
 import { cn } from '@/lib/cn';
 import { TelegramIcon } from './TelegramIcon';
-import { SupportChannels } from './SupportChannels';
+import { SupportContacts } from './SupportContacts';
 
 /**
  * The floating Telegram button, bottom-right on every page.
  *
- * One channel: the button is the link. Two: it opens a small sheet listing
- * both, so a visitor who is already scrolled deep into a board never has to
- * find their way back to a header or footer to get in touch.
+ * One support person: the button is the link. Two: it opens a small sheet
+ * listing both, so a visitor who is already scrolled deep into a board never
+ * has to find their way back to a header or footer to get in touch.
  *
  * Model pages already pin a booking bar to the bottom of a phone screen, and
  * two things fighting for the same thumb is worse than one — so on those
@@ -23,7 +23,7 @@ import { SupportChannels } from './SupportChannels';
  */
 const MODEL_PAGE = /^\/(vi|en)\/(nguoi-mau|models)\/[^/]+\/?$/;
 
-export function SupportFab({ channels }: { channels: TelegramChannel[] }) {
+export function SupportFab({ contacts }: { contacts: SupportContact[] }) {
   const t = useTranslations('support');
   const params = useParams();
   const pathname = usePathname();
@@ -48,12 +48,12 @@ export function SupportFab({ channels }: { channels: TelegramChannel[] }) {
   // Any navigation closes the sheet.
   useEffect(() => setOpen(false), [pathname]);
 
-  if (!channels.length) return null;
+  if (!contacts.length) return null;
 
   const onModelPage = MODEL_PAGE.test(pathname);
   const button =
-    'flex h-14 w-14 items-center justify-center rounded-full bg-gold text-ink shadow-[0_10px_30px_rgba(0,0,0,0.45)] ' +
-    'transition-all duration-500 ease-lux hover:bg-gold-bright hover:scale-105 active:scale-95';
+    'btn-gold flex h-14 w-14 items-center justify-center rounded-full text-ink ' +
+    'transition-transform duration-500 ease-lux hover:scale-105 active:scale-95';
 
   return (
     <div
@@ -64,21 +64,21 @@ export function SupportFab({ channels }: { channels: TelegramChannel[] }) {
         onModelPage ? 'hidden lg:flex' : 'flex',
       )}
     >
-      {channels.length > 1 && open && (
+      {contacts.length > 1 && open && (
         <div
           role="dialog"
           aria-label={t('title')}
-          className="w-[min(20rem,calc(100vw-2rem))] border border-line-strong bg-ink/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-md"
+          className="w-[min(21rem,calc(100vw-2rem))] border border-line-strong bg-ink/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-md"
         >
           <p className="kicker text-gold">{t('title')}</p>
           <p className="mt-1.5 text-xs leading-relaxed text-bone-dim">{t('body')}</p>
-          <SupportChannels channels={channels} variant="list" className="mt-3" />
+          <SupportContacts contacts={contacts} variant="list" className="mt-3" />
         </div>
       )}
 
-      {channels.length === 1 ? (
+      {contacts.length === 1 ? (
         <a
-          href={channels[0]!.url}
+          href={contacts[0]!.url}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackBooking(null, locale)}

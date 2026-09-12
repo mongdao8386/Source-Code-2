@@ -10,7 +10,7 @@ import { Gallery } from '@/components/site/Gallery';
 import { ModelVideo } from '@/components/site/ModelVideo';
 import { ModelCard, isNewModel } from '@/components/site/ModelCard';
 import { BookingButton } from '@/components/site/BookingButton';
-import { SupportChannels } from '@/components/site/SupportChannels';
+import { SupportContacts } from '@/components/site/SupportContacts';
 import { Reveal } from '@/components/site/Reveal';
 import {
   getCategories,
@@ -21,7 +21,7 @@ import {
 import { t, tField } from '@/lib/i18n-text';
 import { modelMeasure, modelPrice } from '@/lib/model-facts';
 import { clientEnv } from '@/lib/env';
-import { primaryTelegram, supportChannels } from '@/lib/telegram';
+import { supportContacts } from '@/lib/telegram';
 
 /** How many other profiles the foot of the page suggests. */
 const RELATED = 4;
@@ -76,8 +76,8 @@ export default async function ModelDetailPage({
 
   if (!model) notFound();
 
-  const telegram = primaryTelegram(settings);
-  const channels = supportChannels(settings);
+  const telegram = settings.telegram_channel_url;
+  const contacts = supportContacts(settings);
   const bio = t(model.bio, locale);
   const m = (model.measurements ?? {}) as Record<string, string | number>;
   const price = modelPrice(model.details, locale);
@@ -219,8 +219,8 @@ export default async function ModelDetailPage({
               <div className="glow-gold">
                 <BookingButton telegramUrl={telegram} modelId={model.id} className="w-full" />
               </div>
-              {channels.length > 0 && (
-                <SupportChannels channels={channels} variant="list" modelId={model.id} className="mt-6" />
+              {contacts.length > 0 && (
+                <SupportContacts contacts={contacts} variant="list" modelId={model.id} className="mt-6" />
               )}
             </div>
           </div>
@@ -270,9 +270,9 @@ export default async function ModelDetailPage({
             )}
             <BookingButton telegramUrl={telegram} modelId={model.id} className="flex-1" />
           </div>
-          {channels.length > 1 && (
-            <SupportChannels
-              channels={channels}
+          {contacts.length > 0 && (
+            <SupportContacts
+              contacts={contacts}
               variant="inline"
               modelId={model.id}
               className="mt-2 justify-center"

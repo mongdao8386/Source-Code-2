@@ -13,7 +13,7 @@ import { ModelCard } from '@/components/site/ModelCard';
 import { ModelTicker } from '@/components/site/ModelTicker';
 import { HeroStack } from '@/components/site/HeroStack';
 import { BookingButton } from '@/components/site/BookingButton';
-import { SupportChannels } from '@/components/site/SupportChannels';
+import { SupportContacts } from '@/components/site/SupportContacts';
 import { TelegramIcon } from '@/components/site/TelegramIcon';
 import {
   getCategories,
@@ -24,7 +24,7 @@ import {
 import { t, tField, tPlain } from '@/lib/i18n-text';
 import { modelMeasure, modelPrice } from '@/lib/model-facts';
 import { publicPhotoUrl } from '@/lib/storage';
-import { primaryTelegram, supportChannels } from '@/lib/telegram';
+import { supportContacts } from '@/lib/telegram';
 
 /** How many portraits the featured board shows: one lead plus a grid. */
 const FEATURED = 9;
@@ -64,8 +64,8 @@ export default async function HomePage({
   const heroImage = tPlain(settings.hero, 'image');
   const headline = tField(settings.hero, 'headline', locale);
   const sub = tField(settings.hero, 'sub', locale);
-  const telegram = primaryTelegram(settings);
-  const channels = supportChannels(settings);
+  const telegram = settings.telegram_channel_url;
+  const contacts = supportContacts(settings);
 
   const catName = (id: string) => {
     const c = categories.find((x) => x.id === id);
@@ -96,7 +96,7 @@ export default async function HomePage({
   const stats: string[] = [];
   if (models.length) stats.push(`${models.length} ${tr('statModels')}`);
   if (categories.length) stats.push(`${categories.length} ${tr('statCategories')}`);
-  if (channels.length) stats.push(tr('statSupport'));
+  if (contacts.length) stats.push(tr('statSupport'));
 
   const steps = [1, 2, 3].map((n) => ({
     n,
@@ -422,9 +422,9 @@ export default async function HomePage({
             </Reveal>
           </div>
 
-          {channels.length > 0 && (
+          {contacts.length > 0 && (
             <Reveal delay={350} className="mx-auto mt-16 max-w-3xl">
-              <SupportChannels channels={channels} variant="cards" />
+              <SupportContacts contacts={contacts} variant="cards" />
             </Reveal>
           )}
         </Container>

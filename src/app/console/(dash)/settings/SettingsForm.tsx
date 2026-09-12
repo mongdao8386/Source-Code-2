@@ -8,7 +8,7 @@ import { Input, Label, FormError } from '@/components/ui/Field';
 import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
 import { TwoLang } from '@/components/admin/TwoLang';
-import { telegramHandle } from '@/lib/telegram';
+import { USERNAME_RE, normalizeUsername } from '@/lib/telegram';
 
 /**
  * The action already reports which field failed; the form used to throw that
@@ -16,8 +16,8 @@ import { telegramHandle } from '@/lib/telegram';
  * dozen inputs. Name them instead.
  */
 const FIELD_LABELS: Record<string, string> = {
-  telegram_channel_url: 'Telegram 1',
-  telegram_support_url: 'Telegram 2',
+  telegram_channel_url: 'Link kênh đặt lịch',
+  telegram_support: 'Hỗ trợ Telegram (username)',
   brand_name: 'Tên site',
   logo_path: 'Logo',
   favicon_path: 'Favicon',
@@ -50,7 +50,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
 
   const [form, setForm] = useState({
     telegram_channel_url: settings.telegram_channel_url ?? '',
-    telegram_support_url: settings.telegram_support_url ?? '',
+    support: readSupport(settings.telegram_support),
     brand_name: settings.brand_name ?? 'STUDIO',
     logo_path: settings.logo_path ?? '',
     favicon_path: settings.favicon_path ?? '',
@@ -77,7 +77,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
     start(async () => {
       const res = await updateSettingsAction({
         telegram_channel_url: form.telegram_channel_url,
-        telegram_support_url: form.telegram_support_url,
+        telegram_support: form.support,
         brand_name: form.brand_name,
         logo_path: form.logo_path,
         favicon_path: form.favicon_path,
@@ -114,25 +114,39 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       />
 
       <section className="space-y-4">
-        <h2 className="kicker">Telegram hỗ trợ</h2>
+        <h2 className="kicker">Kênh đặt lịch</h2>
+        <div>
+          <Label htmlFor="tg">Link kênh Telegram</Label>
+          <Input
+            id="tg"
+            value={form.telegram_channel_url}
+            onChange={(e) => set({ telegram_channel_url: e.target.value })}
+            placeholder="https://t.me/+…"
+          />
+          <p className="mt-1 text-xs text-bone-faint">
+            Nút “Đặt lịch” trên toàn site mở link này. Link mời riêng tư dùng được và không
+            bao giờ hiện ra ngoài. Để trống = nút bị vô hiệu hoá.
+          </p>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="kicker">Hỗ trợ Telegram</h2>
         <p className="text-xs text-bone-faint">
-          Hai kênh Telegram là toàn bộ liên hệ của site. Cả hai hiện ở trang chủ,
-          trang người mẫu, chân trang và nút Telegram nổi. Nút “Đặt lịch” mở
-          kênh 1; nếu kênh 1 trống thì mở kênh 2.
+          Hai tài khoản hỗ trợ, hiện dạng tên + @username ở trang chủ, trang người mẫu,
+          chân trang, menu điện thoại và nút Telegram nổi. Khách bấm là mở chat trực tiếp.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <TelegramField
-            id="tg1"
-            label="Telegram 1 · chính"
-            value={form.telegram_channel_url}
-            onChange={(v) => set({ telegram_channel_url: v })}
-          />
-          <TelegramField
-            id="tg2"
-            label="Telegram 2 · dự phòng"
-            value={form.telegram_support_url}
-            onChange={(v) => set({ telegram_support_url: v })}
-          />
+          {([0, 1] as const).map((i) => (
+            <SupportField
+              key={i}
+              n={i + 1}
+              value={form.support[i]}
+              onChange={(v) =>
+                set({ support: form.support.map((row, j) => (j === i ? v : row)) as SupportRows })
+              }
+            />
+          ))}
         </div>
       </section>
 
@@ -214,41 +228,69 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   );
 }
 
+type SupportRow = { name: string; username: string };
+type SupportRows = [SupportRow, SupportRow];
+
+/** jsonb in, two rows out — never fewer, so both boxes always render. */
+function readSupport(v: unknown): SupportRows {
+  const arr = Array.isArray(v) ? v : [];
+  const row = (k: number): SupportRow => {
+    const o = (arr[k] ?? {}) as { name?: unknown; username?: unknown };
+    return {
+      name: typeof o.name === 'string' ? o.name : '',
+      username: typeof o.username === 'string' ? o.username : '',
+    };
+  };
+  return [row(0), row(1)];
+}
+
 /**
- * One Telegram URL with the handle it resolves to shown underneath, so a typo
- * in the link is visible before it is saved rather than after a client taps
- * a dead button.
+ * One support person: a display name and a username. The username box takes
+ * "@nam", "t.me/nam" or "nam" and shows what the site will render, so a
+ * pasted invite link — which has no username in it — is caught here rather
+ * than by a confused visitor.
  */
-function TelegramField({
-  id,
-  label,
+function SupportField({
+  n,
   value,
   onChange,
 }: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
+  n: number;
+  value: SupportRow;
+  onChange: (v: SupportRow) => void;
 }) {
-  const handle = telegramHandle(value);
-  const looksWrong = value.trim() !== '' && !/^https:\/\/(t\.me|telegram\.me)\//i.test(value.trim());
+  const username = normalizeUsername(value.username);
+  const bad = username !== '' && !USERNAME_RE.test(username);
   return (
-    <div>
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="https://t.me/ten_kenh"
-        className={looksWrong ? 'border-red-500/70' : undefined}
-      />
-      <p className={'mt-1 text-xs ' + (looksWrong ? 'text-red-300' : 'text-bone-faint')}>
-        {looksWrong
-          ? 'Link Telegram thường có dạng https://t.me/…'
-          : handle
-            ? `Hiện trên site là ${handle}`
-            : 'Để trống nếu chưa dùng.'}
-      </p>
+    <div className="space-y-3 border border-line p-4">
+      <p className="kicker">Hỗ trợ {n}</p>
+      <div>
+        <Label htmlFor={`sn${n}`}>Tên hiển thị</Label>
+        <Input
+          id={`sn${n}`}
+          value={value.name}
+          maxLength={40}
+          placeholder={`Ví dụ: Admin ${n === 1 ? 'Nam' : 'Linh'}`}
+          onChange={(e) => onChange({ ...value, name: e.target.value })}
+        />
+      </div>
+      <div>
+        <Label htmlFor={`su${n}`}>Username Telegram</Label>
+        <Input
+          id={`su${n}`}
+          value={value.username}
+          placeholder="@username"
+          onChange={(e) => onChange({ ...value, username: e.target.value })}
+          className={bad ? 'border-red-500/70' : undefined}
+        />
+        <p className={'mt-1 text-xs ' + (bad ? 'text-red-300' : 'text-bone-faint')}>
+          {bad
+            ? 'Không phải username. Link mời (t.me/+…) không dùng được ở đây — cần username của tài khoản.'
+            : username
+              ? `Hiện trên site là ${value.name.trim() || `Hỗ trợ ${n}`} · @${username}`
+              : 'Để trống nếu chưa dùng.'}
+        </p>
+      </div>
     </div>
   );
 }

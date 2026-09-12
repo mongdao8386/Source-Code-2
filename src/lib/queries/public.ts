@@ -28,7 +28,7 @@ export const getSiteSettings = cache(async (): Promise<PublicSiteSettings> => {
   return (
     data ?? {
       telegram_channel_url: '',
-      telegram_support_url: '',
+      telegram_support: [],
       socials: {},
       hero: {},
       announcement: {},

@@ -49,10 +49,12 @@ photos on the page it lands on. An existing profile can be copied back out as
 the same text ("Sao chép dạng văn bản" on its edit page) and pasted in as a
 new one. The parser lives in `src/lib/model-template.ts` with tests beside it.
 
-**Support is two Telegram channels**, set under *Cài đặt → Telegram hỗ trợ*.
-Channel 1 is what the booking button opens (channel 2 when 1 is blank); both
-appear on the home page, model pages, the footer, the mobile menu and the
-floating Telegram button. Nothing else on the public site is a contact.
+**Contact is Telegram only.** The booking button opens the channel set under
+*Cài đặt → Kênh đặt lịch* (a private invite link, never displayed). Beside it,
+*Hỗ trợ Telegram* takes two staff accounts, a display name and a username
+each, shown as people — name, @username, a "Nhắn tin" button — on the home
+page, model pages, the footer, the mobile menu and the floating button.
+Nothing else on the public site is a contact.
 
 ## Local development
 

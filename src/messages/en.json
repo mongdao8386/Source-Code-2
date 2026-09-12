@@ -34,7 +34,7 @@
     "trust1Title": "Clear profiles",
     "trust1Body": "Photos, measurements, area and rate, right on every profile.",
     "trust2Title": "24/7 support",
-    "trust2Body": "Two Telegram channels; someone always answers.",
+    "trust2Body": "Two people on Telegram; someone always answers.",
     "trust3Title": "Discreet",
     "trust3Body": "No account, no client details kept.",
     "trust4Title": "Fast confirmation",
@@ -107,12 +107,10 @@
   },
   "support": {
     "title": "Support on Telegram",
-    "body": "Message either channel below. Both take bookings.",
-    "channel": "Telegram {n}",
-    "primary": "Main channel",
-    "backup": "Backup channel",
-    "open": "Open Telegram",
-    "fab": "Contact on Telegram",
+    "body": "Message either of the two people below directly.",
+    "person": "Support {n}",
+    "message": "Message",
+    "fab": "Contact support",
     "close": "Close"
   }
 }

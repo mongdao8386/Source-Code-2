@@ -2,9 +2,9 @@ import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Container } from '@/components/ui/Container';
 import { Brand } from '@/components/site/Brand';
-import { SupportChannels } from '@/components/site/SupportChannels';
+import { SupportContacts } from '@/components/site/SupportContacts';
 import { getSiteSettings } from '@/lib/queries/public';
-import { supportChannels } from '@/lib/telegram';
+import { supportContacts } from '@/lib/telegram';
 
 export async function SiteFooter() {
   const [t, nav, support, settings] = await Promise.all([
@@ -14,7 +14,7 @@ export async function SiteFooter() {
     getSiteSettings(),
   ]);
   const year = new Date().getFullYear();
-  const channels = supportChannels(settings);
+  const contacts = supportContacts(settings);
 
   const links = [
     { href: '/models', label: nav('models') },
@@ -48,11 +48,11 @@ export async function SiteFooter() {
           </nav>
         </div>
 
-        {channels.length > 0 && (
+        {contacts.length > 0 && (
           <div>
             <p className="kicker text-gold">{t('support')}</p>
             <p className="mt-2 text-xs leading-relaxed text-bone-faint">{support('body')}</p>
-            <SupportChannels channels={channels} variant="list" className="mt-4" />
+            <SupportContacts contacts={contacts} variant="list" className="mt-4" />
           </div>
         )}
       </Container>

@@ -104,11 +104,11 @@ export type Testimonial = {
 
 export type SiteSettings = {
   id: boolean;
-  /** Telegram 1 — the channel the booking button opens. */
+  /** The Telegram channel the booking button opens — an invite link. */
   telegram_channel_url: string;
-  /** Telegram 2 — shown beside the first as a second way in; the booking
-   *  button falls back to it when the first is blank. */
-  telegram_support_url: string;
+  /** Up to two support accounts: [{ name, username }]. Read through
+   *  supportContacts() in lib/telegram.ts, never directly. */
+  telegram_support: Json;
   brand_name: string;
   logo_path: string;
   favicon_path: string;
@@ -128,7 +128,7 @@ export type SiteSettings = {
 export type PublicSiteSettings = Pick<
   SiteSettings,
   | 'telegram_channel_url'
-  | 'telegram_support_url'
+  | 'telegram_support'
   | 'socials'
   | 'hero'
   | 'announcement'
