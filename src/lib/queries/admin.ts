@@ -44,19 +44,29 @@ export async function adminDashboard() {
   };
 }
 
+type PhotoStub = Pick<ModelPhoto, 'id' | 'storage_path' | 'is_cover' | 'sort_order'>;
+
 export async function listModels(): Promise<
-  Array<Model & { photo_count: number }>
+  Array<Model & { photo_count: number; cover_path: string | null }>
 > {
   const supabase = await createClient();
+  // The photo rows themselves rather than a count: the list shows a cover
+  // thumbnail, and one embed is cheaper than a count plus a second query.
   const { data, error } = await supabase
     .from('models')
-    .select(`*, model_photos!${PHOTOS_FK}(count)`)
+    .select(`*, model_photos!${PHOTOS_FK}(id, storage_path, is_cover, sort_order)`)
     .order('display_order', { ascending: true })
     .order('updated_at', { ascending: false });
   assertNoError('admin-list-models', error);
-  return ((data ?? []) as Array<Model & { model_photos: Array<{ count: number }> }>).map(
-    (m) => ({ ...m, photo_count: m.model_photos?.[0]?.count ?? 0 }),
-  );
+  return ((data ?? []) as Array<Model & { model_photos: PhotoStub[] }>).map((m) => {
+    const photos = [...(m.model_photos ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+    const cover =
+      photos.find((p) => p.id === m.cover_photo_id) ??
+      photos.find((p) => p.is_cover) ??
+      photos[0] ??
+      null;
+    return { ...m, photo_count: photos.length, cover_path: cover?.storage_path ?? null };
+  });
 }
 
 export async function getModelForEdit(

@@ -8,7 +8,9 @@ import { createModelAction, updateModelAction, deleteModelAction } from '@/app/c
 import { Button } from '@/components/ui/Button';
 import { TwoLang } from './TwoLang';
 import { DetailRows } from './DetailRows';
+import { TemplateTools } from './TemplateTools';
 import { Input, Label, Select, FormError } from '@/components/ui/Field';
+import { fold, slugify, type ParsedModel } from '@/lib/model-template';
 
 type Bag = { vi?: string; en?: string };
 const bag = (v: unknown): Bag => (v && typeof v === 'object' ? (v as Bag) : {});
@@ -23,16 +25,6 @@ const rows = (v: unknown): ModelDetail[] =>
         value: bag((r as ModelDetail)?.value),
       }))
     : [];
-
-function slugify(s: string) {
-  return s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/đ/gi, 'd')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 export function ModelForm({
   model,
@@ -68,6 +60,42 @@ export function ModelForm({
     details: rows(model?.details),
   });
   const set = (p: Partial<typeof f>) => setF((x) => ({ ...x, ...p }));
+
+  /**
+   * Fill the form from pasted text. Only what the paste actually says is
+   * written; a blank template line leaves the field as it was. The slug is
+   * kept once a model exists — it is the public URL — unless the paste names
+   * one outright. Detail rows with the same label are replaced, new ones
+   * appended, so pasting an updated block does not double up the list.
+   */
+  function applyParsed(p: ParsedModel) {
+    const explicitSlug = p.slug && p.slug !== slugify(p.stage_name) ? p.slug : '';
+    const details = [...f.details];
+    for (const r of p.details) {
+      const i = details.findIndex((d) => fold(d.label.vi ?? '') === fold(r.label.vi ?? ''));
+      if (i >= 0) details[i] = { label: { ...details[i]!.label, ...r.label }, value: r.value };
+      else details.push(r);
+    }
+    set({
+      stage_name: p.stage_name || f.stage_name,
+      slug: explicitSlug || (model ? f.slug : p.slug || f.slug),
+      status: p.status ?? f.status,
+      display_order: p.display_order != null ? String(p.display_order) : f.display_order,
+      height_cm: p.height_cm != null ? String(p.height_cm) : f.height_cm,
+      city: p.city ?? f.city,
+      experience_years:
+        p.experience_years != null ? String(p.experience_years) : f.experience_years,
+      bust: p.bust || f.bust,
+      waist: p.waist || f.waist,
+      hips: p.hips || f.hips,
+      shoe: p.shoe || f.shoe,
+      hair: p.hair || f.hair,
+      eyes: p.eyes || f.eyes,
+      bio: p.bio ? { ...f.bio, vi: p.bio } : f.bio,
+      category_ids: p.category_ids.length ? p.category_ids : f.category_ids,
+      details,
+    });
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -117,6 +145,12 @@ export function ModelForm({
 
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-8">
+      <TemplateTools
+        value={{ ...f, bio: f.bio.vi ?? '' }}
+        categories={categories}
+        onApply={applyParsed}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="sn">Stage name</Label>

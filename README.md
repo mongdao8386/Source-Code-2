@@ -27,6 +27,33 @@ opens a shared Telegram channel. A self-hosted CMS manages everything.
 | Brute force | Redis/in-memory fixed-window limiter on login + MFA |
 | Secrets | `service_role` key server-only (`src/lib/supabase/admin.ts`), never bundled |
 
+## Running the site day to day
+
+**Adding a model is a paste.** *Console → Quản lý gái → Thêm người mẫu* takes
+a block of text in the shape the team already writes:
+
+```
+Tên: Linh Chi
+Chiều cao: 1m65
+Số đo: 86-60-90
+Khu vực: Quận 1
+Giá: 1.500k
+Thể loại: Sinh viên, Văn phòng
+Giới thiệu: Dễ thương, nhiệt tình.
+```
+
+Keys are matched without accents or case; any key that is not a fixed field
+(here `Giá`) becomes a detail row on the public page under its own label. The
+preview beside the box shows exactly what will be saved. Create, then add
+photos on the page it lands on. An existing profile can be copied back out as
+the same text ("Sao chép dạng văn bản" on its edit page) and pasted in as a
+new one. The parser lives in `src/lib/model-template.ts` with tests beside it.
+
+**Support is two Telegram channels**, set under *Cài đặt → Telegram hỗ trợ*.
+Channel 1 is what the booking button opens (channel 2 when 1 is blank); both
+appear on the home page, model pages, the footer, the mobile menu and the
+floating Telegram button. Nothing else on the public site is a contact.
+
 ## Local development
 
 ```bash
