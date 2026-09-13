@@ -101,9 +101,13 @@ export function SiteHeader({
           <BookingButton telegramUrl={telegramUrl} size="sm" label={t('book')} />
         </nav>
 
-        <button
+        {/* On a phone the only booking button used to be inside the menu or
+            the hero — one tap away from anywhere else on the page. */}
+        <div className="flex items-center gap-2 md:hidden">
+          <BookingButton telegramUrl={telegramUrl} size="sm" label={t('book')} />
+          <button
           type="button"
-          className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+          className="relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5"
           aria-label={open ? t('close') : t('menu')}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
@@ -120,7 +124,8 @@ export function SiteHeader({
               open && '-translate-y-[3.5px] -rotate-45',
             )}
           />
-        </button>
+          </button>
+        </div>
       </div>
 
       {/*

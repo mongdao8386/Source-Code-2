@@ -1,6 +1,6 @@
 {
   "nav": {
-    "models": "Girls",
+    "models": "Companions",
     "about": "About",
     "guide": "Guide",
     "terms": "Terms",
@@ -12,21 +12,21 @@
   },
   "home": {
     "eyebrow": "Services · Dating",
-    "featuredTitle": "Newest girls",
+    "featuredTitle": "Newest companions",
     "featuredMore": "See all",
     "categoriesTitle": "Categories",
     "testimonialsTitle": "Client reviews",
     "ctaTitle": "Ready to meet?",
-    "ctaBody": "Pick a girl and message us directly on Telegram to book.",
+    "ctaBody": "Pick a companion and message us directly on Telegram to book.",
     "ctaButton": "Book on Telegram",
-    "statModels": "girls",
+    "statModels": "companions",
     "statCategories": "categories",
     "statSupport": "24/7 support on Telegram",
     "stepsTitle": "Book in three steps",
-    "step1Title": "Pick a girl",
+    "step1Title": "Pick a companion",
     "step1Body": "Photos, measurements, area and price are right on the profile.",
     "step2Title": "Message on Telegram",
-    "step2Body": "Tap Book now, send the girl's name and the time you want.",
+    "step2Body": "Tap Book now, send the companion's name and the time you want.",
     "step3Title": "Confirmation",
     "step3Body": "Support replies within minutes, confirms the booking and guides you from there.",
     "heroNote": "Just updated",
@@ -41,12 +41,12 @@
     "trust4Body": "Bookings confirmed within minutes, with clear step-by-step guidance."
   },
   "models": {
-    "title": "Girls",
-    "subtitle": "Hand-picked beautiful girls for every need.",
+    "title": "Companions",
+    "subtitle": "Hand-picked companions for every occasion.",
     "filterAll": "All",
     "filterCity": "City",
     "filterCategory": "Category",
-    "empty": "No girls match yet.",
+    "empty": "No companions match yet.",
     "height": "Height",
     "experience": "Experience",
     "years": "years",
@@ -57,14 +57,17 @@
     "searchPlaceholder": "Type a name…",
     "searchButton": "Search",
     "clear": "Clear filters",
-    "more": "Other girls",
+    "more": "Other companions",
     "new": "New",
     "viewProfile": "View profile",
     "price": "Price",
     "from": "from",
     "shoe": "Shoe size",
     "hair": "Hair",
-    "eyes": "Eyes"
+    "eyes": "Eyes",
+    "share": "Share",
+    "copied": "Link copied",
+    "prefill": "Hi, I'd like to book {name}."
   },
   "booking": {
     "cta": "Book now",
@@ -99,7 +102,7 @@
     "signOut": "Sign out",
     "nav": {
       "dashboard": "Overview",
-      "models": "Girls",
+      "models": "Companions",
       "categories": "Categories",
       "pages": "Pages",
       "testimonials": "Testimonials",
@@ -118,7 +121,7 @@
   },
   "meta": {
     "title": "Booking",
-    "description": "Hand-picked girls, booked directly on Telegram."
+    "description": "Hand-picked companions, booked directly on Telegram."
   },
   "gallery": {
     "close": "Close",

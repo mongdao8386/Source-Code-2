@@ -64,7 +64,10 @@
     "from": "từ",
     "shoe": "Cỡ giày",
     "hair": "Tóc",
-    "eyes": "Mắt"
+    "eyes": "Mắt",
+    "share": "Chia sẻ",
+    "copied": "Đã sao chép link",
+    "prefill": "Chào, mình muốn đặt lịch với {name}."
   },
   "booking": {
     "cta": "Đặt ngay",

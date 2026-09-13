@@ -3,7 +3,7 @@ export const revalidate = 300;
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { Link } from '@/i18n/navigation';
+import { Link, getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { Container } from '@/components/ui/Container';
 import { Gallery } from '@/components/site/Gallery';
@@ -21,6 +21,8 @@ import {
 import { t, tField } from '@/lib/i18n-text';
 import { modelMeasure, modelPrice } from '@/lib/model-facts';
 import { clientEnv } from '@/lib/env';
+import { publicPhotoUrl } from '@/lib/storage';
+import { ShareButton } from '@/components/site/ShareButton';
 import { supportContacts } from '@/lib/telegram';
 
 /** How many other profiles the foot of the page suggests. */
@@ -50,11 +52,39 @@ export async function generateMetadata({
   if (!model) return {};
   const title = tField(model.seo, 'title', locale) || model.stage_name;
   const description = tField(model.seo, 'description', locale) || t(model.bio, locale);
+
+  // The localised URL, not `/${locale}/models/${slug}`: the Vietnamese page
+  // lives at /vi/nguoi-mau/…, and a canonical pointing somewhere else told
+  // search engines the page was a copy of one that does not exist.
+  const urlFor = (l: Locale) =>
+    `${clientEnv.NEXT_PUBLIC_SITE_URL}${getPathname({
+      locale: l,
+      href: { pathname: '/models/[slug]', params: { slug } },
+    })}`;
+
+  // The cover as the share image, so a link dropped into Telegram unfurls
+  // with the face rather than the site's generic card.
+  const cover = model.photos.find((p) => p.id === model.cover_photo_id) ?? model.photos[0];
+  const images = cover
+    ? [
+        {
+          url: publicPhotoUrl(cover.storage_path),
+          width: cover.width ?? undefined,
+          height: cover.height ?? undefined,
+          alt: model.stage_name,
+        },
+      ]
+    : undefined;
+
   return {
     title,
     description,
-    alternates: { canonical: `${clientEnv.NEXT_PUBLIC_SITE_URL}/${locale}/models/${slug}` },
-    openGraph: { title, description, type: 'profile' },
+    alternates: {
+      canonical: urlFor(locale),
+      languages: { vi: urlFor('vi'), en: urlFor('en') },
+    },
+    openGraph: { title, description, type: 'profile', images },
+    twitter: { card: cover ? 'summary_large_image' : 'summary', title, description },
   };
 }
 
@@ -162,8 +192,8 @@ export default async function ModelDetailPage({
           </div>
         )}
 
-        {tags.length > 0 && (
-          <ul className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          <ul className="flex flex-wrap items-center gap-2">
             {tags.map((c) => (
               <li key={c.slug}>
                 <Link
@@ -176,7 +206,8 @@ export default async function ModelDetailPage({
               </li>
             ))}
           </ul>
-        )}
+          <ShareButton title={model.stage_name} />
+        </div>
       </Container>
 
       <Container className="mt-12 grid gap-12 lg:grid-cols-[1fr_21rem] lg:gap-14">
@@ -220,7 +251,13 @@ export default async function ModelDetailPage({
                 <BookingButton telegramUrl={telegram} modelId={model.id} className="w-full" />
               </div>
               {contacts.length > 0 && (
-                <SupportContacts contacts={contacts} variant="list" modelId={model.id} className="mt-6" />
+                <SupportContacts
+                  contacts={contacts}
+                  variant="list"
+                  modelId={model.id}
+                  prefill={tr('prefill', { name: model.stage_name })}
+                  className="mt-6"
+                />
               )}
             </div>
           </div>
@@ -275,6 +312,7 @@ export default async function ModelDetailPage({
               contacts={contacts}
               variant="inline"
               modelId={model.id}
+              prefill={tr('prefill', { name: model.stage_name })}
               className="mt-2 justify-center"
             />
           )}

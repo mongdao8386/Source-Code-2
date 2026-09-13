@@ -25,11 +25,18 @@ export function SupportContacts({
   contacts,
   variant = 'list',
   modelId,
+  prefill,
   className,
 }: {
   contacts: SupportContact[];
   variant?: 'cards' | 'list' | 'inline';
   modelId?: string;
+  /**
+   * A message to start the chat with, e.g. "Chào, mình muốn đặt lịch với
+   * Linh Chi." Telegram takes it from `?text=` on a t.me/<username> link and
+   * puts it in the input, so the visitor only has to press send.
+   */
+  prefill?: string;
   className?: string;
 }) {
   const t = useTranslations('support');
@@ -40,6 +47,8 @@ export function SupportContacts({
 
   const onClick = () => trackBooking(modelId, locale);
   const nameOf = (c: SupportContact) => c.name || t('person', { n: c.n });
+  const hrefOf = (c: SupportContact) =>
+    prefill ? `${c.url}?text=${encodeURIComponent(prefill)}` : c.url;
 
   /**
    * The avatar: an uploaded photo, else the first letter of the name. Names
@@ -68,7 +77,7 @@ export function SupportContacts({
         {contacts.map((c) => (
           <li key={c.n}>
             <a
-              href={c.url}
+              href={hrefOf(c)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onClick}
@@ -103,7 +112,7 @@ export function SupportContacts({
         {contacts.map((c) => (
           <li key={c.n}>
             <a
-              href={c.url}
+              href={hrefOf(c)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onClick}
@@ -125,7 +134,7 @@ export function SupportContacts({
       {contacts.map((c) => (
         <li key={c.n}>
           <a
-            href={c.url}
+            href={hrefOf(c)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClick}
