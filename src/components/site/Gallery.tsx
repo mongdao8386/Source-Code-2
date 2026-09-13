@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import type { Locale } from '@/i18n/routing';
 import type { ModelPhoto } from '@/lib/supabase/types';
 import { publicPhotoUrl } from '@/lib/storage';
@@ -17,6 +18,8 @@ export function Gallery({
   locale: Locale;
   name: string;
 }) {
+  // `t` is the bilingual-bag reader from lib/i18n-text; this is the UI strings.
+  const tg = useTranslations('gallery');
   const [open, setOpen] = useState<number | null>(null);
 
   const close = useCallback(() => setOpen(null), []);
@@ -52,7 +55,7 @@ export function Gallery({
             type="button"
             onClick={() => setOpen(i)}
             className="group block w-full overflow-hidden bg-surface-1"
-            aria-label={`${name} — ${i + 1}`}
+            aria-label={`${name} · ${tg('photo', { n: i + 1 })}`}
           >
             <Image
               src={publicPhotoUrl(p.storage_path)}
@@ -77,15 +80,15 @@ export function Gallery({
             type="button"
             onClick={close}
             className="absolute right-5 top-5 p-2 text-bone-dim hover:text-bone"
-            aria-label="Close"
+            aria-label={tg('close')}
           >
             <span className="block h-px w-6 rotate-45 bg-current" />
             <span className="-mt-px block h-px w-6 -rotate-45 bg-current" />
           </button>
           {photos.length > 1 && (
             <>
-              <NavArrow dir="left" onClick={(e) => { e.stopPropagation(); step(-1); }} />
-              <NavArrow dir="right" onClick={(e) => { e.stopPropagation(); step(1); }} />
+              <NavArrow dir="left" label={tg('prev')} onClick={(e) => { e.stopPropagation(); step(-1); }} />
+              <NavArrow dir="right" label={tg('next')} onClick={(e) => { e.stopPropagation(); step(1); }} />
             </>
           )}
           <div className="relative max-h-[88vh] w-auto" onClick={(e) => e.stopPropagation()}>
@@ -106,16 +109,18 @@ export function Gallery({
 
 function NavArrow({
   dir,
+  label,
   onClick,
 }: {
   dir: 'left' | 'right';
+  label: string;
   onClick: (e: React.MouseEvent) => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={dir}
+      aria-label={label}
       className={cn(
         'absolute top-1/2 -translate-y-1/2 p-4 text-bone-dim hover:text-bone',
         dir === 'left' ? 'left-2' : 'right-2',

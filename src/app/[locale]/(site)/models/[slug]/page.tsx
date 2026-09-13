@@ -99,9 +99,9 @@ export default async function ModelDetailPage({
 
   // The full sheet in the sidebar: everything above, then the rest.
   const spec: Array<[string, string]> = [...facts];
-  if (m.shoe) spec.push(['Shoe', String(m.shoe)]);
-  if (m.hair) spec.push(['Hair', String(m.hair)]);
-  if (m.eyes) spec.push(['Eyes', String(m.eyes)]);
+  if (m.shoe) spec.push([tr('shoe'), String(m.shoe)]);
+  if (m.hair) spec.push([tr('hair'), String(m.hair)]);
+  if (m.eyes) spec.push([tr('eyes'), String(m.eyes)]);
   if (model.experience_years != null)
     spec.push([tr('experience'), `${model.experience_years} ${tr('years')}`]);
 

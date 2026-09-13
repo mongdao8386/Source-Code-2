@@ -61,7 +61,10 @@
     "new": "Mới",
     "viewProfile": "Xem hồ sơ",
     "price": "Giá",
-    "from": "từ"
+    "from": "từ",
+    "shoe": "Cỡ giày",
+    "hair": "Tóc",
+    "eyes": "Mắt"
   },
   "booking": {
     "cta": "Đặt ngay",
@@ -112,5 +115,15 @@
     "message": "Nhắn tin",
     "fab": "Liên hệ hỗ trợ",
     "close": "Đóng"
+  },
+  "meta": {
+    "title": "Đặt lịch",
+    "description": "Tuyển chọn gái đi khách chuyên nghiệp."
+  },
+  "gallery": {
+    "close": "Đóng",
+    "prev": "Ảnh trước",
+    "next": "Ảnh sau",
+    "photo": "Ảnh {n}"
   }
 }
