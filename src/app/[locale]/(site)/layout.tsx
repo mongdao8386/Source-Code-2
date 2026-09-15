@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { setRequestLocale } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { AnnouncementBar } from '@/components/site/AnnouncementBar';
 import { MaintenanceScreen } from '@/components/site/MaintenanceScreen';
 import { SupportFab } from '@/components/site/SupportFab';
 import { SiteProtection } from '@/components/site/SiteProtection';
+import { BackToTop } from '@/components/site/BackToTop';
 import { readProtection } from '@/lib/protection';
 import { getSiteSettings } from '@/lib/queries/public';
 import { supportContacts } from '@/lib/telegram';
@@ -27,6 +28,7 @@ export default async function SiteLayout({
 
   const contacts = supportContacts(settings);
   const protection = readProtection(settings.protection);
+  const nav = await getTranslations('nav');
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -46,6 +48,12 @@ export default async function SiteLayout({
         blockContextMenu={protection.blockContextMenu}
         blockShortcuts={protection.blockShortcuts}
         hideOnBlur={protection.hideOnBlur}
+      />
+      {/* Sits above the Telegram button, centred on it. */}
+      <BackToTop
+        label={nav('top')}
+        hideOnModelPageMobile
+        className="right-[1.375rem] bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:right-[1.875rem] md:bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))]"
       />
     </div>
   );

@@ -5,6 +5,7 @@ import { signOutAction } from '@/lib/auth/actions';
 import { AdminNav } from './AdminNav';
 import { Brand } from '@/components/site/Brand';
 import { getSiteSettings } from '@/lib/queries/public';
+import { BackToTop } from '@/components/site/BackToTop';
 
 export async function AdminShell({
   role,
@@ -81,6 +82,7 @@ export async function AdminShell({
         <main className="gutter-safe pad-safe-bottom flex-1 py-8">
           <div className="mx-auto max-w-5xl">{children}</div>
         </main>
+        <BackToTop label="Lên đầu trang" className="bottom-5 right-5 md:bottom-8 md:right-8" />
       </div>
     </div>
   );

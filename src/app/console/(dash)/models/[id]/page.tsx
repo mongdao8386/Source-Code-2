@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { CMS_LOCALE } from '@/lib/admin-path';
+import { CMS_LOCALE, adminHref } from '@/lib/admin-path';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { ModelForm } from '@/components/admin/ModelForm';
 import { PhotoUploader } from '@/components/admin/PhotoUploader';
@@ -21,6 +21,7 @@ export default async function EditModelPage({
   return (
     <>
       <PageHeader
+        back={{ href: adminHref('/models'), label: 'Quản lý gái' }}
         title={model.stage_name}
         description={model.slug}
         action={

@@ -244,6 +244,12 @@ export function QuickAddModel({ categories }: { categories: Category[] }) {
           <Link href={adminHref(`/models/${phase.id}`)} className={buttonClass('outline', 'md')}>
             Sửa hồ sơ / thêm video
           </Link>
+          <Link
+            href={adminHref('/models')}
+            className="text-xs uppercase tracking-[0.16em] text-bone-dim hover:text-gold"
+          >
+            Về danh sách
+          </Link>
           {phase.published && (
             <a
               href={`/${CMS_LOCALE}/nguoi-mau/${phase.slug}`}

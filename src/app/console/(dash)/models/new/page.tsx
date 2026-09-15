@@ -1,3 +1,4 @@
+import { adminHref } from '@/lib/admin-path';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { QuickAddModel } from '@/components/admin/QuickAddModel';
 import { listCategories } from '@/lib/queries/admin';
@@ -11,6 +12,7 @@ export default async function NewModelPage() {
       <PageHeader
         title="Thêm người mẫu"
         description="Dán hồ sơ theo mẫu, thả ảnh vào, bấm một nút là xong."
+        back={{ href: adminHref('/models'), label: 'Quản lý gái' }}
       />
       <QuickAddModel categories={categories} />
     </>

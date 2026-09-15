@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { adminHref } from '@/lib/admin-path';
 import type { Category, Model, ModelDetail } from '@/lib/supabase/types';
 import { createModelAction, updateModelAction, deleteModelAction } from '@/app/console/(dash)/models/actions';
@@ -36,6 +37,7 @@ export function ModelForm({
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const seo = rec(model?.seo);
   const m = rec(model?.measurements);
 
@@ -100,6 +102,7 @@ export function ModelForm({
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSaved(false);
     const payload = {
       slug: f.slug || slugify(f.stage_name),
       stage_name: f.stage_name,
@@ -129,6 +132,9 @@ export function ModelForm({
       if (!model && id) {
         router.replace(adminHref(`/models/${id}`));
       } else {
+        // The page re-renders with the same values, which looked like nothing
+        // happened; say so.
+        setSaved(true);
         router.refresh();
       }
     });
@@ -235,15 +241,22 @@ export function ModelForm({
 
       {error && <FormError>{error}</FormError>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={pending}>
-          {pending ? '…' : model ? 'Save' : 'Create'}
+          {pending ? '…' : model ? 'Lưu' : 'Tạo hồ sơ'}
         </Button>
+        {saved && !pending && <span className="text-sm text-gold">Đã lưu</span>}
         {model && (
           <Button type="button" variant="ghost" onClick={remove} disabled={pending} className="text-red-400">
-            Delete
+            Xoá
           </Button>
         )}
+        <Link
+          href={adminHref('/models')}
+          className="ml-auto text-xs uppercase tracking-[0.16em] text-bone-dim hover:text-gold"
+        >
+          &larr; Về danh sách
+        </Link>
       </div>
     </form>
   );
