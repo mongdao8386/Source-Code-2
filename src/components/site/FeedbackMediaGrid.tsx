@@ -60,14 +60,23 @@ export function FeedbackMediaGrid({ media, alt }: { media: FeedbackMedia[]; alt:
               >
                 <video
                   src={src}
+                  poster={m.poster ? publicPhotoUrl(m.poster) : undefined}
                   controls
-                  preload="metadata"
+                  preload={m.poster ? 'none' : 'metadata'}
                   playsInline
                   controlsList="nodownload noremoteplayback"
                   disablePictureInPicture
                   onContextMenu={(e) => e.preventDefault()}
                   className="h-full w-full object-cover"
                 />
+                {/* So a clip that has no poster and has not loaded a frame
+                    yet is still visibly a clip, not an empty box. */}
+                <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 bg-ink/70 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-bone backdrop-blur-sm">
+                  <svg width="8" height="10" viewBox="0 0 8 10" aria-hidden>
+                    <path d="M0 0l8 5-8 5z" fill="currentColor" />
+                  </svg>
+                  video
+                </span>
               </li>
             );
           }

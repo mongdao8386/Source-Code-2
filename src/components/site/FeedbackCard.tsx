@@ -28,11 +28,14 @@ export function FeedbackCard({
   const quote = t(item.quote, locale);
   const anonymous = item.is_anonymous || !item.author.trim();
   const name = anonymous ? ANONYMOUS[locale] : item.author;
-  const date = new Date(item.created_at).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+  // reviewed_at is a bare date; parse it as local so it does not slip a day.
+  const date = item.reviewed_at
+    ? new Date(`${item.reviewed_at}T12:00:00`).toLocaleDateString(
+        locale === 'vi' ? 'vi-VN' : 'en-GB',
+        { day: 'numeric', month: 'short', year: 'numeric' },
+      )
+    : '';
+  const meta = [item.role, date].filter(Boolean).join(' · ');
   const initial = anonymous ? '?' : (Array.from(item.author.normalize('NFKC').trim())[0] ?? '').toUpperCase();
 
   return (
@@ -43,10 +46,11 @@ export function FeedbackCard({
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm text-bone">{name}</p>
-          <p className="mt-0.5 truncate text-[0.6875rem] uppercase tracking-[0.16em] text-bone-faint">
-            {item.role ? `${item.role} · ` : ''}
-            {date}
-          </p>
+          {meta && (
+            <p className="mt-0.5 truncate text-[0.6875rem] uppercase tracking-[0.16em] text-bone-faint">
+              {meta}
+            </p>
+          )}
         </div>
         <div className="shrink-0">
           <Stars rating={readRating(item.rating)} />

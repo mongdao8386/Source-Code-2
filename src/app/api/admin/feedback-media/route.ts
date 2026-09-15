@@ -63,14 +63,42 @@ export async function POST(request: NextRequest) {
       upsert: false,
     });
     if (up.error) return NextResponse.json({ error: up.error.message }, { status: 500 });
+
+    // The still the browser grabbed, if it managed one. Best effort: a clip
+    // without a poster still plays, it just shows a play badge until then.
+    let poster: string | undefined;
+    const still = form.get('poster');
+    if (still instanceof File && still.size > 0 && still.size <= MAX_IMAGE_BYTES) {
+      try {
+        const bytes = Buffer.from(await still.arrayBuffer());
+        const k = sniff(bytes);
+        if (k === 'jpeg' || k === 'png' || k === 'webp') {
+          const webp = await sharp(bytes, { failOn: 'error' })
+            .rotate()
+            .resize({ width: 1280, height: 1280, fit: 'inside', withoutEnlargement: true })
+            .webp({ quality: 78 })
+            .toBuffer();
+          const posterPath = `feedback/${id}-poster.webp`;
+          const pu = await storage.upload(posterPath, webp, {
+            contentType: 'image/webp',
+            cacheControl: '31536000',
+            upsert: false,
+          });
+          if (!pu.error) poster = posterPath;
+        }
+      } catch {
+        /* no poster, then */
+      }
+    }
+
     await audit({
       actorId: staff.userId,
       action: 'feedback_media.upload',
       entity: 'testimonials',
       entityId: null,
-      meta: { kind, path, bytes: file.size },
+      meta: { kind, path, poster: poster ?? null, bytes: file.size },
     }).catch(() => {});
-    return NextResponse.json({ media: { kind: 'video', path } });
+    return NextResponse.json({ media: { kind: 'video', path, poster } });
   }
 
   if (file.size > MAX_IMAGE_BYTES) {

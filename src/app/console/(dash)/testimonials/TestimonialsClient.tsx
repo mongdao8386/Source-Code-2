@@ -10,7 +10,8 @@ import { deleteTestimonialAction, upsertTestimonialAction } from './actions';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Select, Textarea, FormError } from '@/components/ui/Field';
 import { TranslateButton } from '@/components/admin/TranslateButton';
-import { PhotoDrop } from '@/components/admin/PhotoDrop';
+import { PhotoDrop, isVideoFile } from '@/components/admin/PhotoDrop';
+import { captureVideoPoster } from '@/lib/video-poster';
 import { cn } from '@/lib/cn';
 
 /**
@@ -37,6 +38,8 @@ type Draft = {
   model_id: string;
   author: string;
   is_anonymous: boolean;
+  /** YYYY-MM-DD, or '' to print no date. */
+  reviewed_at: string;
   role: string;
   vi: string;
   en: string;
@@ -44,10 +47,13 @@ type Draft = {
   is_published: boolean;
   media: FeedbackMedia[];
 };
+const today = () => new Date().toISOString().slice(0, 10);
+
 const empty: Draft = {
   model_id: '',
   author: '',
   is_anonymous: false,
+  reviewed_at: '',
   role: '',
   vi: '',
   en: '',
@@ -64,7 +70,7 @@ export function TestimonialsClient({
   models: Array<{ id: string; stage_name: string }>;
 }) {
   const router = useRouter();
-  const [d, setD] = useState<Draft>(empty);
+  const [d, setD] = useState<Draft>(() => ({ ...empty, reviewed_at: today() }));
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -78,6 +84,7 @@ export function TestimonialsClient({
       model_id: item.model_id ?? '',
       author: item.author,
       is_anonymous: item.is_anonymous,
+      reviewed_at: item.reviewed_at ?? '',
       role: item.role ?? '',
       vi: bag(item.quote).vi ?? '',
       en: bag(item.quote).en ?? '',
@@ -91,6 +98,10 @@ export function TestimonialsClient({
   async function uploadOne(file: File): Promise<FeedbackMedia | string> {
     const fd = new FormData();
     fd.append('file', file);
+    if (isVideoFile(file)) {
+      const still = await captureVideoPoster(file);
+      if (still) fd.append('poster', still, 'poster.jpg');
+    }
     try {
       const res = await fetch('/api/admin/feedback-media', { method: 'POST', body: fd });
       const json = await res.json().catch(() => ({}));
@@ -124,6 +135,7 @@ export function TestimonialsClient({
       model_id: d.model_id || null,
       author: d.author,
       is_anonymous: d.is_anonymous,
+      reviewed_at: d.reviewed_at || null,
       role: d.role || null,
       quote: { vi: d.vi, en: d.en },
       rating: d.rating,
@@ -136,7 +148,7 @@ export function TestimonialsClient({
       setErr(res.error === 'validation' ? 'Kiểm tra lại các ô (tên khách bắt buộc).' : res.error);
       return;
     }
-    setD(empty);
+    setD({ ...empty, reviewed_at: today() });
     setFiles([]);
     router.refresh();
   }
@@ -148,6 +160,7 @@ export function TestimonialsClient({
       model_id: item.model_id,
       author: item.author,
       is_anonymous: item.is_anonymous,
+      reviewed_at: item.reviewed_at,
       role: item.role,
       quote: bag(item.quote),
       rating: readRating(item.rating),
@@ -242,6 +255,27 @@ export function TestimonialsClient({
               </Select>
             </div>
             <div>
+              <Label htmlFor="fd">Ngày hiện trên site</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="fd"
+                  type="date"
+                  value={d.reviewed_at}
+                  onChange={(e) => set({ reviewed_at: e.target.value })}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-11 shrink-0"
+                  onClick={() => set({ reviewed_at: d.reviewed_at ? '' : today() })}
+                >
+                  {d.reviewed_at ? 'Ẩn ngày' : 'Hôm nay'}
+                </Button>
+              </div>
+              <p className="mt-1 text-xs text-bone-faint">Để trống = không hiện ngày.</p>
+            </div>
+            <div>
               <Label>Đánh giá</Label>
               <div className="flex h-11 items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -305,7 +339,13 @@ export function TestimonialsClient({
               {d.media.map((m) => (
                 <li key={m.path} className="group relative aspect-[4/5] overflow-hidden border border-line bg-surface-1">
                   {m.kind === 'video' ? (
-                    <video src={publicPhotoUrl(m.path)} muted preload="metadata" className="h-full w-full object-cover" />
+                    <video
+                      src={publicPhotoUrl(m.path)}
+                      poster={m.poster ? publicPhotoUrl(m.poster) : undefined}
+                      muted
+                      preload={m.poster ? 'none' : 'metadata'}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <Image src={publicPhotoUrl(m.path)} alt="" fill sizes="120px" className="object-cover" unoptimized />
                   )}
@@ -359,7 +399,9 @@ export function TestimonialsClient({
                 </p>
                 <p className="mt-1 line-clamp-2 text-sm text-bone-dim">{bag(item.quote).vi || bag(item.quote).en}</p>
                 <p className="mt-1 text-xs text-bone-faint">
-                  {new Date(item.created_at).toLocaleDateString('vi-VN')}
+                  {item.reviewed_at
+                    ? new Date(`${item.reviewed_at}T12:00:00`).toLocaleDateString('vi-VN')
+                    : 'không hiện ngày'}
                   {media.length > 0 && ` · ${media.length} tệp`}
                 </p>
               </div>

@@ -107,6 +107,7 @@ export async function listTestimonials(): Promise<FeedbackItem[]> {
   const { data } = await supabase
     .from('testimonials')
     .select('*, model:models(stage_name, slug)')
+    .order('reviewed_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false });
   return (data ?? []) as unknown as FeedbackItem[];
 }

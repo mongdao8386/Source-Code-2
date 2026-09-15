@@ -20,10 +20,13 @@ export type FeedbackMedia = {
   path: string;
   width?: number;
   height?: number;
+  /** Video only: a still to show before play, feedback/<uuid>-poster.webp */
+  poster?: string;
 };
 
 /** Only objects the feedback upload route writes. */
 export const FEEDBACK_MEDIA_PATH = /^feedback\/[0-9a-f-]{36}\.(webp|mp4|webm)$/;
+export const FEEDBACK_POSTER_PATH = /^feedback\/[0-9a-f-]{36}-poster\.webp$/;
 
 export const FEEDBACK_MEDIA_MAX = 12;
 
@@ -37,7 +40,11 @@ export function readFeedbackMedia(raw: unknown): FeedbackMedia[] {
     const kind = /\.(mp4|webm)$/.test(path) ? 'video' : 'image';
     const dim = (v: unknown) =>
       typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : undefined;
-    out.push({ kind, path, width: dim(o.width), height: dim(o.height) });
+    const poster =
+      kind === 'video' && typeof o.poster === 'string' && FEEDBACK_POSTER_PATH.test(o.poster.trim())
+        ? o.poster.trim()
+        : undefined;
+    out.push({ kind, path, width: dim(o.width), height: dim(o.height), poster });
   }
   return out;
 }

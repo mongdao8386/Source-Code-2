@@ -102,6 +102,8 @@ export type Testimonial = {
   sort_order: number;
   /** Shown as "Khách ẩn danh"; author is blank when this is set. */
   is_anonymous: boolean;
+  /** The date printed on the review (YYYY-MM-DD); null prints none. */
+  reviewed_at: string | null;
   /** The model the review is about, if any. */
   model_id: string | null;
   /** Screenshots and clips; lib/feedback.ts owns the shape. */
@@ -266,6 +268,7 @@ export type Database = {
           | 'model_id'
           | 'media'
           | 'is_anonymous'
+          | 'reviewed_at'
         >,
         Partial<Testimonial>
       >;

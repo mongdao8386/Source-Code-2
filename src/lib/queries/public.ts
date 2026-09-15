@@ -125,6 +125,9 @@ export const getPublishedFeedback = cache(
       .from('testimonials')
       .select('*, model:models(stage_name, slug)')
       .eq('is_published', true)
+      // The printed date decides the order when there is one; a review with
+      // no date sorts by when it was posted.
+      .order('reviewed_at', { ascending: false, nullsFirst: false })
       .order('created_at', { ascending: false });
     if (opts.modelId) query = query.eq('model_id', opts.modelId);
     if (opts.limit) query = query.limit(opts.limit);

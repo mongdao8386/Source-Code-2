@@ -4,7 +4,12 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { cmsAction, i18nString } from '@/lib/cms/action';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { FEEDBACK_MEDIA_MAX, FEEDBACK_MEDIA_PATH, readFeedbackMedia } from '@/lib/feedback';
+import {
+  FEEDBACK_MEDIA_MAX,
+  FEEDBACK_MEDIA_PATH,
+  FEEDBACK_POSTER_PATH,
+  readFeedbackMedia,
+} from '@/lib/feedback';
 
 const media = z
   .array(
@@ -13,6 +18,7 @@ const media = z
       path: z.string().regex(FEEDBACK_MEDIA_PATH, 'bad path'),
       width: z.number().int().positive().optional(),
       height: z.number().int().positive().optional(),
+      poster: z.string().regex(FEEDBACK_POSTER_PATH, 'bad poster').optional(),
     }),
   )
   .max(FEEDBACK_MEDIA_MAX)
@@ -23,6 +29,12 @@ const fields = {
   media,
   author: z.string().trim().max(120),
   is_anonymous: z.boolean().default(false),
+  // A calendar date or nothing; nothing means the site prints no date.
+  reviewed_at: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'bad date')
+    .nullable()
+    .default(null),
   role: z.string().trim().max(120).nullable().default(null),
   quote: i18nString,
   rating: z.coerce.number().int().min(1).max(5).nullable().default(null),
@@ -52,10 +64,10 @@ export const upsertTestimonialAction = cmsAction({
         .select('media')
         .eq('id', id)
         .maybeSingle();
-      const keep = new Set(rest.media.map((m) => m.path));
+      const keep = new Set(rest.media.flatMap((m) => [m.path, m.poster ?? '']));
       stale = readFeedbackMedia(current?.media)
-        .map((m) => m.path)
-        .filter((p) => !keep.has(p));
+        .flatMap((m) => [m.path, m.poster ?? ''])
+        .filter((p) => p && !keep.has(p));
     }
 
     const q = id
@@ -84,7 +96,7 @@ export const deleteTestimonialAction = cmsAction({
       .maybeSingle();
     const { error } = await supabase.from('testimonials').delete().eq('id', input.id);
     if (error) return { ok: false, error: error.message };
-    const paths = readFeedbackMedia(current?.media).map((m) => m.path);
+    const paths = readFeedbackMedia(current?.media).flatMap((m) => [m.path, m.poster ?? '']).filter(Boolean);
     if (paths.length) {
       await createAdminClient().storage.from('models-public').remove(paths);
     }

@@ -16,10 +16,19 @@ describe('readFeedbackMedia', () => {
       'junk',
     ]);
     expect(m).toEqual([
-      { kind: 'image', path: `feedback/${id}.webp`, width: 800, height: 1200 },
-      { kind: 'video', path: `feedback/${id}.mp4`, width: undefined, height: undefined },
-      { kind: 'video', path: `feedback/${id}.webm`, width: undefined, height: undefined },
+      { kind: 'image', path: `feedback/${id}.webp`, width: 800, height: 1200, poster: undefined },
+      { kind: 'video', path: `feedback/${id}.mp4`, width: undefined, height: undefined, poster: undefined },
+      { kind: 'video', path: `feedback/${id}.webm`, width: undefined, height: undefined, poster: undefined },
     ]);
+  });
+
+  it('keeps a poster only on video, and only from the upload route', () => {
+    const m = readFeedbackMedia([
+      { path: `feedback/${id}.mp4`, poster: `feedback/${id}-poster.webp` },
+      { path: `feedback/${id}.mp4`, poster: 'https://evil.example/p.webp' },
+      { path: `feedback/${id}.webp`, poster: `feedback/${id}-poster.webp` },
+    ]);
+    expect(m.map((x) => x.poster)).toEqual([`feedback/${id}-poster.webp`, undefined, undefined]);
   });
 
   it('tolerates anything that is not a list', () => {
@@ -30,7 +39,7 @@ describe('readFeedbackMedia', () => {
 
   it('drops bogus dimensions rather than the entry', () => {
     const [m] = readFeedbackMedia([{ path: `feedback/${id}.webp`, width: -5, height: 'tall' }]);
-    expect(m).toEqual({ kind: 'image', path: `feedback/${id}.webp`, width: undefined, height: undefined });
+    expect(m).toEqual({ kind: 'image', path: `feedback/${id}.webp`, width: undefined, height: undefined, poster: undefined });
   });
 });
 
