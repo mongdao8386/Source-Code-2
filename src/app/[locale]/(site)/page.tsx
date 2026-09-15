@@ -8,7 +8,7 @@ import type { Locale } from '@/i18n/routing';
 import { Container } from '@/components/ui/Container';
 import { Reveal } from '@/components/site/Reveal';
 import { Marquee } from '@/components/site/Marquee';
-import { Stars } from '@/components/site/Stars';
+import { FeedbackCard } from '@/components/site/FeedbackCard';
 import { ModelCard } from '@/components/site/ModelCard';
 import { ModelTicker } from '@/components/site/ModelTicker';
 import { HeroStack } from '@/components/site/HeroStack';
@@ -18,7 +18,7 @@ import { TelegramIcon } from '@/components/site/TelegramIcon';
 import {
   getCategories,
   getPublishedModels,
-  getPublishedTestimonials,
+  getPublishedFeedback,
   getSiteSettings,
 } from '@/lib/queries/public';
 import { t, tField, tPlain } from '@/lib/i18n-text';
@@ -51,13 +51,14 @@ export default async function HomePage({
   // The whole catalogue rather than the first eight: the hero counts it and
   // the ticker runs through all of it. One query either way — the board just
   // slices what it needs.
-  const [tr, trm, settings, models, categories, testimonials] = await Promise.all([
+  const [tr, trm, tf, settings, models, categories, testimonials] = await Promise.all([
     getTranslations('home'),
     getTranslations('models'),
+    getTranslations('feedback'),
     getSiteSettings(),
     getPublishedModels(),
     getCategories(),
-    getPublishedTestimonials(),
+    getPublishedFeedback({ limit: 3 }),
   ]);
 
   // hero.image is a bare storage path, not a { vi, en } bag.
@@ -366,34 +367,25 @@ export default async function HomePage({
         </Container>
       )}
 
-      {/* ── Testimonials ─────────────────────────────────────── */}
+      {/* ── Feedback ─────────────────────────────────────────── */}
       {testimonials.length > 0 && (
         <Container as="section" className="mt-28 md:mt-40">
-          <p className="kicker text-gold">04</p>
-          <h2 className="mt-3 text-section text-bone">{tr('testimonialsTitle')}</h2>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="kicker text-gold">04</p>
+              <h2 className="mt-3 text-section text-bone">{tr('testimonialsTitle')}</h2>
+            </div>
+            <Link
+              href="/feedback"
+              className="link-wipe text-xs uppercase tracking-[0.22em] text-bone-dim hover:text-gold"
+            >
+              {tf('all')} &#8599;
+            </Link>
+          </div>
           <ul className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((q, i) => (
-              <Reveal
-                as="li"
-                key={q.id}
-                delay={(i % 3) * 90}
-                className="flex flex-col border border-line bg-surface-1/30 p-6 transition-colors duration-500 hover:border-gold/40 md:p-7"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-2 font-display text-base text-gold">
-                    {q.author.charAt(0)}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-bone">{q.author}</p>
-                    {q.role && <p className="kicker text-[0.6rem]">{q.role}</p>}
-                  </div>
-                  <div className="ml-auto shrink-0">
-                    <Stars rating={q.rating} />
-                  </div>
-                </div>
-                <blockquote className="mt-5 font-display text-xl leading-snug text-bone">
-                  &ldquo;{t(q.quote, locale)}&rdquo;
-                </blockquote>
+              <Reveal as="li" key={q.id} delay={(i % 3) * 90}>
+                <FeedbackCard item={q} locale={locale} aboutLabel={tf('forModel')} />
               </Reveal>
             ))}
           </ul>

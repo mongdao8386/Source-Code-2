@@ -100,6 +100,10 @@ export type Testimonial = {
   rating: number | null;
   is_published: boolean;
   sort_order: number;
+  /** The model the review is about, if any. */
+  model_id: string | null;
+  /** Screenshots and clips; lib/feedback.ts owns the shape. */
+  media: Json;
 } & Timestamps;
 
 export type SiteSettings = {
@@ -257,6 +261,8 @@ export type Database = {
           | 'rating'
           | 'role'
           | 'avatar_path'
+          | 'model_id'
+          | 'media'
         >,
         Partial<Testimonial>
       >;

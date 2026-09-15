@@ -18,6 +18,7 @@ export async function SiteFooter() {
 
   const links = [
     { href: '/models', label: nav('models') },
+    { href: '/feedback', label: nav('feedback') },
     { href: '/about', label: nav('about') },
     { href: '/guide', label: nav('guide') },
     { href: '/terms', label: nav('terms') },

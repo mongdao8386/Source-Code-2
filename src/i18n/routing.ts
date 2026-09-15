@@ -40,5 +40,6 @@ export const routing = defineRouting({
     '/about': { vi: '/ve-chung-toi', en: '/about' },
     '/terms': { vi: '/dieu-khoan', en: '/terms' },
     '/guide': { vi: '/huong-dan', en: '/guide' },
+    '/feedback': '/feedback',
   },
 });

@@ -12,9 +12,11 @@ import { ModelCard, isNewModel } from '@/components/site/ModelCard';
 import { BookingButton } from '@/components/site/BookingButton';
 import { SupportContacts } from '@/components/site/SupportContacts';
 import { Reveal } from '@/components/site/Reveal';
+import { FeedbackCard } from '@/components/site/FeedbackCard';
 import {
   getCategories,
   getModelBySlug,
+  getPublishedFeedback,
   getPublishedModels,
   getSiteSettings,
 } from '@/lib/queries/public';
@@ -96,15 +98,17 @@ export default async function ModelDetailPage({
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  const [model, settings, tr, all, categories] = await Promise.all([
+  const [model, settings, tr, tf, all, categories] = await Promise.all([
     getModelBySlug(slug),
     getSiteSettings(),
     getTranslations('models'),
+    getTranslations('feedback'),
     getPublishedModels(),
     getCategories(),
   ]);
 
   if (!model) notFound();
+  const reviews = await getPublishedFeedback({ modelId: model.id, limit: 6 });
 
   const telegram = settings.telegram_channel_url;
   const contacts = supportContacts(settings);
@@ -263,6 +267,28 @@ export default async function ModelDetailPage({
           </div>
         </aside>
       </Container>
+
+      {/* ── Her reviews ──────────────────────────────────────── */}
+      {reviews.length > 0 && (
+        <Container as="section" className="mt-28 md:mt-36">
+          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+            <h2 className="text-section text-bone">{tf('about', { name: model.stage_name })}</h2>
+            <Link
+              href="/feedback"
+              className="link-wipe text-xs uppercase tracking-[0.22em] text-bone-dim hover:text-gold"
+            >
+              {tf('all')} &#8599;
+            </Link>
+          </div>
+          <div className="mt-10 gap-5 md:columns-2 [&>*]:mb-5 [&>*]:break-inside-avoid">
+            {reviews.map((r, i) => (
+              <Reveal key={r.id} delay={(i % 2) * 80}>
+                <FeedbackCard item={r} locale={locale} showModel={false} />
+              </Reveal>
+            ))}
+          </div>
+        </Container>
+      )}
 
       {/* ── Other profiles ───────────────────────────────────── */}
       {related.length > 0 && (

@@ -12,6 +12,7 @@ import { cn } from '@/lib/cn';
 
 const links = [
   { href: '/models', key: 'models' },
+  { href: '/feedback', key: 'feedback' },
   { href: '/about', key: 'about' },
   { href: '/guide', key: 'guide' },
 ] as const;

@@ -9,7 +9,8 @@
     "close": "Đóng",
     "language": "Ngôn ngữ",
     "online": "Online 24/7",
-    "top": "Lên đầu trang"
+    "top": "Lên đầu trang",
+    "feedback": "Feedback"
   },
   "home": {
     "eyebrow": "Dịch vụ · Hẹn hò",
@@ -106,7 +107,7 @@
       "models": "Quản lý gái",
       "categories": "Thể loại",
       "pages": "Trang nội dung",
-      "testimonials": "Đánh giá",
+      "testimonials": "Feedback",
       "settings": "Cài đặt",
       "users": "Người dùng",
       "audit": "Nhật ký"
@@ -129,5 +130,14 @@
     "prev": "Ảnh trước",
     "next": "Ảnh sau",
     "photo": "Ảnh {n}"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subtitle": "Khách nói gì sau mỗi lần hẹn.",
+    "empty": "Chưa có feedback nào.",
+    "all": "Xem tất cả feedback",
+    "about": "Feedback về {name}",
+    "count": "{count} feedback",
+    "forModel": "Về"
   }
 }

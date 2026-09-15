@@ -9,8 +9,8 @@ import type {
   ModelPhoto,
   Page,
   PublicSiteSettings,
-  Testimonial,
 } from '@/lib/supabase/types';
+import type { FeedbackItem } from '@/lib/feedback';
 
 /**
  * Public read layer. Every call runs through the anon/session client, so RLS
@@ -117,16 +117,22 @@ export const getModelBySlug = cache(
   },
 );
 
-export const getPublishedTestimonials = cache(async (): Promise<Testimonial[]> => {
-  const supabase = createAnonClient();
-  const { data, error } = await supabase
-    .from('testimonials')
-    .select('*')
-    .eq('is_published', true)
-    .order('sort_order', { ascending: true });
-  assertNoError('testimonials', error);
-  return data ?? [];
-});
+/** Published reviews, newest first, each with the model it is about. */
+export const getPublishedFeedback = cache(
+  async (opts: { modelId?: string; limit?: number } = {}): Promise<FeedbackItem[]> => {
+    const supabase = createAnonClient();
+    let query = supabase
+      .from('testimonials')
+      .select('*, model:models(stage_name, slug)')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+    if (opts.modelId) query = query.eq('model_id', opts.modelId);
+    if (opts.limit) query = query.limit(opts.limit);
+    const { data, error } = await query;
+    assertNoError('feedback', error);
+    return (data ?? []) as unknown as FeedbackItem[];
+  },
+);
 
 export const getPage = cache(async (slug: string): Promise<Page | null> => {
   const supabase = createAnonClient();

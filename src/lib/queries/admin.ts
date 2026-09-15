@@ -9,8 +9,8 @@ import type {
   ModelPhoto,
   Page,
   SiteSettings,
-  Testimonial,
 } from '@/lib/supabase/types';
+import type { FeedbackItem } from '@/lib/feedback';
 
 /** All reads here run as the signed-in staff member (RLS-scoped). */
 
@@ -102,13 +102,23 @@ export async function listPages(): Promise<Page[]> {
   return (data ?? []) as Page[];
 }
 
-export async function listTestimonials(): Promise<Testimonial[]> {
+export async function listTestimonials(): Promise<FeedbackItem[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('testimonials')
-    .select('*')
-    .order('sort_order', { ascending: true });
-  return (data ?? []) as Testimonial[];
+    .select('*, model:models(stage_name, slug)')
+    .order('created_at', { ascending: false });
+  return (data ?? []) as unknown as FeedbackItem[];
+}
+
+/** Just enough of every model to fill a select. */
+export async function listModelNames(): Promise<Array<{ id: string; stage_name: string }>> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('models')
+    .select('id, stage_name')
+    .order('stage_name', { ascending: true });
+  return (data ?? []) as Array<{ id: string; stage_name: string }>;
 }
 
 export async function getSettings(): Promise<SiteSettings | null> {

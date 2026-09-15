@@ -9,7 +9,8 @@
     "close": "Close",
     "language": "Language",
     "online": "Online 24/7",
-    "top": "Back to top"
+    "top": "Back to top",
+    "feedback": "Reviews"
   },
   "home": {
     "eyebrow": "Services · Dating",
@@ -106,7 +107,7 @@
       "models": "Companions",
       "categories": "Categories",
       "pages": "Pages",
-      "testimonials": "Testimonials",
+      "testimonials": "Reviews",
       "settings": "Settings",
       "users": "Users",
       "audit": "Audit log"
@@ -129,5 +130,14 @@
     "prev": "Previous photo",
     "next": "Next photo",
     "photo": "Photo {n}"
+  },
+  "feedback": {
+    "title": "Reviews",
+    "subtitle": "What clients say after each date.",
+    "empty": "No reviews yet.",
+    "all": "See all reviews",
+    "about": "Reviews of {name}",
+    "count": "{count} reviews",
+    "forModel": "About"
   }
 }

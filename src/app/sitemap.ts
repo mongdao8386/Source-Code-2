@@ -6,7 +6,7 @@ import { getPublishedModels } from '@/lib/queries/public';
 
 // Canonical route keys; getPathname turns each into the locale's own slug
 // (/vi/nguoi-mau, /en/models), which is what the page actually answers on.
-const STATIC_PATHS = ['/', '/models', '/about', '/guide', '/terms'] as const;
+const STATIC_PATHS = ['/', '/models', '/feedback', '/about', '/guide', '/terms'] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = clientEnv.NEXT_PUBLIC_SITE_URL;
