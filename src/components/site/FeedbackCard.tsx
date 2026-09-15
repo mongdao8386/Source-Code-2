@@ -5,6 +5,8 @@ import { FeedbackMediaGrid } from '@/components/site/FeedbackMediaGrid';
 import { readFeedbackMedia, readRating, type FeedbackItem } from '@/lib/feedback';
 import { t } from '@/lib/i18n-text';
 
+const ANONYMOUS: Record<Locale, string> = { vi: 'Khách ẩn danh', en: 'Anonymous' };
+
 /**
  * One customer review: who, when, how many stars, which model, what they
  * said, and whatever they sent along with it.
@@ -24,12 +26,14 @@ export function FeedbackCard({
 }) {
   const media = readFeedbackMedia(item.media);
   const quote = t(item.quote, locale);
+  const anonymous = item.is_anonymous || !item.author.trim();
+  const name = anonymous ? ANONYMOUS[locale] : item.author;
   const date = new Date(item.created_at).toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
-  const initial = (Array.from(item.author.normalize('NFKC').trim())[0] ?? '').toUpperCase();
+  const initial = anonymous ? '?' : (Array.from(item.author.normalize('NFKC').trim())[0] ?? '').toUpperCase();
 
   return (
     <article className="border border-line bg-surface-1/30 p-5 transition-colors duration-500 hover:border-gold/40 md:p-6">
@@ -38,7 +42,7 @@ export function FeedbackCard({
           {initial}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm text-bone">{item.author}</p>
+          <p className="truncate text-sm text-bone">{name}</p>
           <p className="mt-0.5 truncate text-[0.6875rem] uppercase tracking-[0.16em] text-bone-faint">
             {item.role ? `${item.role} · ` : ''}
             {date}
@@ -65,7 +69,7 @@ export function FeedbackCard({
         </blockquote>
       )}
 
-      <FeedbackMediaGrid media={media} alt={item.author} />
+      <FeedbackMediaGrid media={media} alt={name} />
     </article>
   );
 }

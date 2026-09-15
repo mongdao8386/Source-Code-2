@@ -21,7 +21,8 @@ const media = z
 const fields = {
   model_id: z.string().uuid().nullable().default(null),
   media,
-  author: z.string().trim().min(1).max(120),
+  author: z.string().trim().max(120),
+  is_anonymous: z.boolean().default(false),
   role: z.string().trim().max(120).nullable().default(null),
   quote: i18nString,
   rating: z.coerce.number().int().min(1).max(5).nullable().default(null),
@@ -30,7 +31,14 @@ const fields = {
 };
 
 export const upsertTestimonialAction = cmsAction({
-  schema: z.object({ id: z.string().uuid().optional(), ...fields }),
+  schema: z
+    .object({ id: z.string().uuid().optional(), ...fields })
+    .refine((v) => v.is_anonymous || v.author.length > 0, {
+      path: ['author'],
+      message: 'name or anonymous',
+    })
+    // Nothing to leak: an anonymous review never carries the real name.
+    .transform((v) => (v.is_anonymous ? { ...v, author: '' } : v)),
   action: 'testimonial.upsert',
   entity: 'testimonials',
   handler: async ({ input, supabase }) => {

@@ -36,6 +36,7 @@ type Draft = {
   id?: string;
   model_id: string;
   author: string;
+  is_anonymous: boolean;
   role: string;
   vi: string;
   en: string;
@@ -46,6 +47,7 @@ type Draft = {
 const empty: Draft = {
   model_id: '',
   author: '',
+  is_anonymous: false,
   role: '',
   vi: '',
   en: '',
@@ -75,6 +77,7 @@ export function TestimonialsClient({
       id: item.id,
       model_id: item.model_id ?? '',
       author: item.author,
+      is_anonymous: item.is_anonymous,
       role: item.role ?? '',
       vi: bag(item.quote).vi ?? '',
       en: bag(item.quote).en ?? '',
@@ -120,6 +123,7 @@ export function TestimonialsClient({
       id: d.id,
       model_id: d.model_id || null,
       author: d.author,
+      is_anonymous: d.is_anonymous,
       role: d.role || null,
       quote: { vi: d.vi, en: d.en },
       rating: d.rating,
@@ -143,6 +147,7 @@ export function TestimonialsClient({
       id: item.id,
       model_id: item.model_id,
       author: item.author,
+      is_anonymous: item.is_anonymous,
       role: item.role,
       quote: bag(item.quote),
       rating: readRating(item.rating),
@@ -156,7 +161,7 @@ export function TestimonialsClient({
   }
 
   async function remove(item: FeedbackItem) {
-    if (!confirm(`Xoá feedback của ${item.author}? Ảnh/video kèm theo cũng bị xoá.`)) return;
+    if (!confirm(`Xoá feedback của ${item.is_anonymous ? 'khách ẩn danh' : item.author}? Ảnh/video kèm theo cũng bị xoá.`)) return;
     setBusy('…');
     const res = await deleteTestimonialAction({ id: item.id });
     setBusy(null);
@@ -189,15 +194,31 @@ export function TestimonialsClient({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <Label htmlFor="fa">Tên khách</Label>
+              <div className="flex items-baseline justify-between gap-3">
+                <Label htmlFor="fa">Tên khách</Label>
+                <label className="flex items-center gap-2 text-xs text-bone-dim">
+                  <input
+                    type="checkbox"
+                    checked={d.is_anonymous}
+                    onChange={(e) => set({ is_anonymous: e.target.checked })}
+                  />
+                  Khách muốn ẩn danh
+                </label>
+              </div>
               <Input
                 id="fa"
-                value={d.author}
-                required
+                value={d.is_anonymous ? '' : d.author}
+                disabled={d.is_anonymous}
+                required={!d.is_anonymous}
                 maxLength={120}
-                placeholder="Anh Minh, Khách Q1…"
+                placeholder={d.is_anonymous ? 'Sẽ hiện là “Khách ẩn danh”' : 'Anh Minh, Khách Q1…'}
                 onChange={(e) => set({ author: e.target.value })}
               />
+              {d.is_anonymous && (
+                <p className="mt-1 text-xs text-bone-faint">
+                  Không lưu tên thật. Ghi chú ngắn vẫn hiện, nên đừng ghi tên vào đó.
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="fr">Ghi chú ngắn</Label>
@@ -272,7 +293,7 @@ export function TestimonialsClient({
 
           {err && <FormError>{err}</FormError>}
 
-          <Button type="submit" disabled={!!busy || !d.author.trim()}>
+          <Button type="submit" disabled={!!busy || (!d.is_anonymous && !d.author.trim())}>
             {busy ?? (d.id ? 'Lưu thay đổi' : 'Đăng feedback')}
           </Button>
         </div>
@@ -324,13 +345,13 @@ export function TestimonialsClient({
                 ))}
                 {media.length === 0 && (
                   <span className="flex h-16 w-12 items-center justify-center bg-surface-1 font-display text-lg text-bone-faint">
-                    {item.author.charAt(0)}
+                    {item.is_anonymous ? '?' : item.author.charAt(0)}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-bone">
-                  {item.author}
+                  {item.is_anonymous ? <span className="text-bone-dim">Khách ẩn danh</span> : item.author}
                   {rating && <span className="ml-2 text-gold">{'★'.repeat(rating)}</span>}
                   {modelName(item.model_id) && (
                     <span className="ml-2 text-xs text-bone-dim">· về {modelName(item.model_id)}</span>
