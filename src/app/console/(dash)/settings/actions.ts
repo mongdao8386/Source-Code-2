@@ -47,7 +47,7 @@ const protectionSchema = z
         opacity: z.coerce.number().min(0.05).max(0.6).default(0.18),
         size: z.coerce.number().int().min(12).max(48).default(22),
         angle: z.coerce.number().int().min(-60).max(60).default(-30),
-        mode: z.enum(['tile', 'corner']).default('tile'),
+        mode: z.enum(['single', 'tile', 'corner']).default('single'),
         color: z.enum(['light', 'dark', 'gold']).default('light'),
       })
       .default({}),

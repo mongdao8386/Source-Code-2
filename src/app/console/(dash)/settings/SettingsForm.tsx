@@ -452,7 +452,8 @@ function ProtectionFields({
                 value={w.mode}
                 onChange={(e) => setW({ mode: e.target.value as WatermarkMode })}
               >
-                <option value="tile">Lặp chéo khắp ảnh (khó cắt bỏ)</option>
+                <option value="single">Một dòng chéo giữa ảnh</option>
+                <option value="tile">Lặp chéo khắp ảnh (khó cắt bỏ hơn)</option>
                 <option value="corner">Một dòng ở góc dưới phải</option>
               </Select>
             </div>
@@ -486,7 +487,7 @@ function ProtectionFields({
               unit="px"
               onChange={(v) => setW({ size: v })}
             />
-            {w.mode === 'tile' && (
+            {w.mode !== 'corner' && (
               <Range
                 id="wma"
                 label="Góc nghiêng"

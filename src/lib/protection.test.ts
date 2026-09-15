@@ -16,7 +16,7 @@ describe('readProtection', () => {
     expect(p.watermark.opacity).toBe(0.6);
     expect(p.watermark.size).toBe(48);
     expect(p.watermark.angle).toBe(-60);
-    expect(p.watermark.mode).toBe('tile');
+    expect(p.watermark.mode).toBe('single');
     expect(p.watermark.color).toBe('light');
     expect(p.watermark.text).toHaveLength(40);
     expect(p.blockShortcuts).toBe(true);
@@ -36,8 +36,16 @@ describe('watermarkCss', () => {
     expect(watermarkCss(DEFAULT_PROTECTION, '')['--wm-image']).toBe('none');
   });
 
-  it('falls back to the brand name and upper-cases it', () => {
+  it('draws one mark across the frame by default, scaled to the box', () => {
     const css = watermarkCss(DEFAULT_PROTECTION, 'Bướm Xoè');
+    expect(css['--wm-repeat']).toBe('no-repeat');
+    expect(css['--wm-size']).toBe('100% 100%');
+    expect(decodeURIComponent(css['--wm-image'])).toContain("viewBox='0 0 100 100'");
+    expect(decodeURIComponent(css['--wm-image'])).toContain('BƯỚM XOÈ');
+  });
+
+  it('tiles when asked, falling back to the brand name and upper-casing it', () => {
+    const css = watermarkCss(readProtection({ watermark: { mode: 'tile' } }), 'Bướm Xoè');
     expect(css['--wm-repeat']).toBe('repeat');
     expect(decodeURIComponent(css['--wm-image'])).toContain('BƯỚM XOÈ');
   });

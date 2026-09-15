@@ -11,7 +11,7 @@
  * Client-safe: the CMS builds the same SVG for its live preview.
  */
 
-export type WatermarkMode = 'tile' | 'corner';
+export type WatermarkMode = 'single' | 'tile' | 'corner';
 export type WatermarkColor = 'light' | 'dark' | 'gold';
 
 export type Protection = {
@@ -23,7 +23,7 @@ export type Protection = {
     opacity: number;
     /** Font size in px, 12–48. */
     size: number;
-    /** Degrees, -60–60. Tile mode only. */
+    /** Degrees, -60–60. Single and tile modes. */
     angle: number;
     mode: WatermarkMode;
     color: WatermarkColor;
@@ -43,7 +43,7 @@ export const DEFAULT_PROTECTION: Protection = {
     opacity: 0.18,
     size: 22,
     angle: -30,
-    mode: 'tile',
+    mode: 'single',
     color: 'light',
   },
   blockContextMenu: true,
@@ -72,7 +72,7 @@ export function readProtection(raw: unknown): Protection {
       opacity: clamp(w.opacity, 0.05, 0.6, d.watermark.opacity),
       size: Math.round(clamp(w.size, 12, 48, d.watermark.size)),
       angle: Math.round(clamp(w.angle, -60, 60, d.watermark.angle)),
-      mode: w.mode === 'corner' ? 'corner' : 'tile',
+      mode: w.mode === 'tile' || w.mode === 'corner' ? w.mode : 'single',
       color: w.color === 'dark' || w.color === 'gold' ? w.color : 'light',
     },
     blockContextMenu: bool(o.blockContextMenu, d.blockContextMenu),
@@ -101,11 +101,33 @@ export function watermarkCss(
 
   const { size, opacity, angle, mode, color } = p.watermark;
   const fill = color === 'dark' ? '#000000' : color === 'gold' ? accent : '#ffffff';
-  const font = `font-family='Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-weight='600' letter-spacing='2'`;
+  const fontAttrs = (letterSpacing: number) =>
+    `font-family='Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif' font-weight='600' letter-spacing='${letterSpacing}'`;
+  const font = fontAttrs(2);
   const label = escapeXml(text.toUpperCase());
   // Rough glyph width for a bold sans at this size; generous so long names
   // never clip at the tile edge.
   const textW = Math.ceil(text.length * size * 0.72) + size;
+
+  if (mode === 'single') {
+    // One mark across the middle of the frame. The SVG has no pixel size,
+    // only a 100×100 viewBox that the box stretches to 100% × 100%; with
+    // "meet" the square scales to the frame's width and centres, so the
+    // mark is always the same fraction of the photo whatever its size.
+    // Units are therefore percent of the width: the size setting maps to
+    // roughly 4–14% and a long name is shrunk so it still fits.
+    const units = Math.min(size * 0.3, 90 / (Math.max(1, text.length) * 0.62));
+    const svg =
+      `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid meet'>` +
+      `<text x='50' y='50' text-anchor='middle' dominant-baseline='middle' font-size='${units.toFixed(2)}' ${fontAttrs(+(units * 0.12).toFixed(2))} fill='${fill}' fill-opacity='${opacity}' transform='rotate(${angle} 50 50)'>${label}</text>` +
+      `</svg>`;
+    return {
+      '--wm-image': `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`,
+      '--wm-repeat': 'no-repeat',
+      '--wm-position': 'center',
+      '--wm-size': '100% 100%',
+    };
+  }
 
   if (mode === 'corner') {
     const w = textW + size;
