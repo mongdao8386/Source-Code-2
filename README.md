@@ -44,8 +44,10 @@ Giới thiệu: Dễ thương, nhiệt tình.
 
 Keys are matched without accents or case; any key that is not a fixed field
 (here `Giá`) becomes a detail row on the public page under its own label. The
-preview beside the box shows exactly what will be saved. Create, then add
-photos on the page it lands on. An existing profile can be copied back out as
+preview beside the box shows exactly what will be saved. Photos go in the
+box under it — dropped, picked, or pasted with Ctrl+V straight from Telegram —
+and one button creates the profile, uploads them all, makes the first the
+cover and puts it live. An existing profile can be copied back out as
 the same text ("Sao chép dạng văn bản" on its edit page) and pasted in as a
 new one. The parser lives in `src/lib/model-template.ts` with tests beside it.
 

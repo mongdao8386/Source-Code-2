@@ -10,7 +10,7 @@ export default async function NewModelPage() {
     <>
       <PageHeader
         title="Thêm người mẫu"
-        description="Dán hồ sơ theo mẫu, xem lại bên phải, tạo, rồi thêm ảnh."
+        description="Dán hồ sơ theo mẫu, thả ảnh vào, bấm một nút là xong."
       />
       <QuickAddModel categories={categories} />
     </>
