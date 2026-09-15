@@ -5,6 +5,8 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { AnnouncementBar } from '@/components/site/AnnouncementBar';
 import { MaintenanceScreen } from '@/components/site/MaintenanceScreen';
 import { SupportFab } from '@/components/site/SupportFab';
+import { SiteProtection } from '@/components/site/SiteProtection';
+import { readProtection } from '@/lib/protection';
 import { getSiteSettings } from '@/lib/queries/public';
 import { supportContacts } from '@/lib/telegram';
 
@@ -24,6 +26,7 @@ export default async function SiteLayout({
   }
 
   const contacts = supportContacts(settings);
+  const protection = readProtection(settings.protection);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -39,6 +42,11 @@ export default async function SiteLayout({
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <SupportFab contacts={contacts} />
+      <SiteProtection
+        blockContextMenu={protection.blockContextMenu}
+        blockShortcuts={protection.blockShortcuts}
+        hideOnBlur={protection.hideOnBlur}
+      />
     </div>
   );
 }

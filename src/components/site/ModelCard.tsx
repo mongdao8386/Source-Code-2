@@ -57,7 +57,7 @@ export function ModelCard({
       href={{ pathname: '/models/[slug]', params: { slug: model.slug } }}
       className={cn('group block', className)}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-surface-1 ring-1 ring-line transition-shadow duration-500 group-hover:ring-gold/60">
+      <div className="wm relative aspect-[3/4] overflow-hidden bg-surface-1 ring-1 ring-line transition-shadow duration-500 group-hover:ring-gold/60">
         {src ? (
           <Image
             src={src}

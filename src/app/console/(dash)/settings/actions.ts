@@ -37,6 +37,26 @@ const storagePath = optionalText(300).refine(
   'bad path',
 );
 
+/** Mirrors readProtection() in lib/protection.ts; out-of-range values are refused, not clamped. */
+const protectionSchema = z
+  .object({
+    watermark: z
+      .object({
+        enabled: z.boolean().default(true),
+        text: optionalText(40),
+        opacity: z.coerce.number().min(0.05).max(0.6).default(0.18),
+        size: z.coerce.number().int().min(12).max(48).default(22),
+        angle: z.coerce.number().int().min(-60).max(60).default(-30),
+        mode: z.enum(['tile', 'corner']).default('tile'),
+        color: z.enum(['light', 'dark', 'gold']).default('light'),
+      })
+      .default({}),
+    blockContextMenu: z.boolean().default(true),
+    blockShortcuts: z.boolean().default(true),
+    hideOnBlur: z.boolean().default(true),
+  })
+  .default({});
+
 const schema = z.object({
   telegram_channel_url: urlOrEmpty,
   // Two staff accounts. "@nam", "t.me/nam" and "nam" all normalise to the
@@ -101,6 +121,7 @@ const schema = z.object({
     })
     .default({}),
   maintenance_mode: z.boolean().default(false),
+  protection: protectionSchema,
 });
 
 export const updateSettingsAction = cmsAction({

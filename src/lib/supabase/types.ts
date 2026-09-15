@@ -109,6 +109,8 @@ export type SiteSettings = {
   /** Up to two support accounts: [{ name, username }]. Read through
    *  supportContacts() in lib/telegram.ts, never directly. */
   telegram_support: Json;
+  /** Watermark and browser deterrents; lib/protection.ts owns the shape. */
+  protection: Json;
   brand_name: string;
   logo_path: string;
   favicon_path: string;
@@ -129,6 +131,7 @@ export type PublicSiteSettings = Pick<
   SiteSettings,
   | 'telegram_channel_url'
   | 'telegram_support'
+  | 'protection'
   | 'socials'
   | 'hero'
   | 'announcement'

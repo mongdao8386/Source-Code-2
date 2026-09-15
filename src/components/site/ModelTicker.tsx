@@ -52,7 +52,7 @@ export function ModelTicker({
                   // appearing twice in the same strip.
                   aria-hidden={copy === 1}
                   tabIndex={copy === 1 ? -1 : undefined}
-                  className="group relative block h-56 w-40 shrink-0 overflow-hidden bg-surface-1 md:h-72 md:w-52"
+                  className="wm group relative block h-56 w-40 shrink-0 overflow-hidden bg-surface-1 md:h-72 md:w-52"
                 >
                   {src ? (
                     <Image

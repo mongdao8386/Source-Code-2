@@ -8,6 +8,7 @@ import { routing, safeLocale, type Locale } from '@/i18n/routing';
 import { clientEnv } from '@/lib/env';
 import { getSiteSettings } from '@/lib/queries/public';
 import { publicPhotoUrl } from '@/lib/storage';
+import { readProtection, watermarkCss } from '@/lib/protection';
 import '../globals.css';
 
 const display = Fraunces({
@@ -88,7 +89,14 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${display.variable} ${sans.variable}`}
-      style={{ '--color-gold': accent } as React.CSSProperties}
+      // The watermark overlay reads its image and geometry from these; one
+      // string on <html> is the whole change when settings change.
+      style={
+        {
+          '--color-gold': accent,
+          ...watermarkCss(readProtection(settings.protection), settings.brand_name, accent),
+        } as React.CSSProperties
+      }
     >
       <body>
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>

@@ -4,11 +4,18 @@ import { useRef, useState, useTransition } from 'react';
 import type { SiteSettings } from '@/lib/supabase/types';
 import { updateSettingsAction } from './actions';
 import { Button } from '@/components/ui/Button';
-import { Input, Label, FormError } from '@/components/ui/Field';
+import { Input, Label, Select, FormError } from '@/components/ui/Field';
 import { BrandFields, type BrandState } from './BrandFields';
 import { HeroImageField } from './HeroImageField';
 import { TwoLang } from '@/components/admin/TwoLang';
 import { USERNAME_RE, normalizeUsername } from '@/lib/telegram';
+import {
+  readProtection,
+  watermarkCss,
+  type Protection,
+  type WatermarkColor,
+  type WatermarkMode,
+} from '@/lib/protection';
 import { publicPhotoUrl } from '@/lib/storage';
 
 /**
@@ -30,6 +37,7 @@ const FIELD_LABELS: Record<string, string> = {
   hero: 'Hero (headline, sub hoặc ảnh nền)',
   announcement: 'Announcement',
   maintenance_mode: 'Maintenance mode',
+  protection: 'Bảo vệ ảnh',
 };
 
 function describe(res: { error: string; fieldErrors?: Record<string, string[]> }): string {
@@ -68,6 +76,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
     annEnabled: Boolean(ann.enabled),
     annText: bag(ann.text),
     maintenance: Boolean(settings.maintenance_mode),
+    protection: readProtection(settings.protection),
   });
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
@@ -90,6 +99,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         hero: { headline: form.headline, sub: form.sub, image: form.heroImage },
         announcement: { enabled: form.annEnabled, text: form.annText },
         maintenance_mode: form.maintenance,
+        protection: form.protection,
       });
       setMsg(
         res.ok
@@ -195,6 +205,13 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
           </div>
         </div>
       </details>
+
+      <ProtectionFields
+        value={form.protection}
+        brandName={form.brand_name}
+        accent={/^#[0-9a-fA-F]{6}$/.test(form.accent_color) ? form.accent_color : '#c8a253'}
+        onChange={(protection) => set({ protection })}
+      />
 
       <section className="space-y-4">
         <h2 className="kicker">Announcement</h2>
@@ -372,6 +389,212 @@ function SupportField({
               : 'Để trống nếu chưa dùng.'}
         </p>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Photo protection, with the watermark drawn live on a sample frame so the
+ * text, opacity and angle can be judged before anything is saved. The same
+ * function builds the overlay on the public site.
+ */
+function ProtectionFields({
+  value,
+  brandName,
+  accent,
+  onChange,
+}: {
+  value: Protection;
+  brandName: string;
+  accent: string;
+  onChange: (v: Protection) => void;
+}) {
+  const w = value.watermark;
+  const setW = (patch: Partial<Protection['watermark']>) =>
+    onChange({ ...value, watermark: { ...w, ...patch } });
+  const css = watermarkCss(value, brandName, accent);
+
+  return (
+    <section className="space-y-5">
+      <h2 className="kicker">Bảo vệ ảnh</h2>
+      <p className="text-xs text-bone-faint">
+        Không có cách nào chặn tuyệt đối việc chụp màn hình. Mục tiêu là mọi đường tải xuống
+        dễ nhất đều bị chặn, và ảnh nào bị chụp cũng mang dấu của site. Watermark là lớp phủ
+        lúc hiển thị: đổi ở đây là toàn bộ ảnh, cũ lẫn mới, đổi theo ngay.
+      </p>
+
+      <div className="grid gap-6 md:grid-cols-[1fr_15rem]">
+        <div className="space-y-4">
+          <Toggle
+            checked={w.enabled}
+            onChange={(enabled) => setW({ enabled })}
+            label="Phủ watermark lên ảnh và video"
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="wmt">Chữ watermark</Label>
+              <Input
+                id="wmt"
+                value={w.text}
+                maxLength={40}
+                placeholder={brandName || 'Tên site'}
+                onChange={(e) => setW({ text: e.target.value })}
+              />
+              <p className="mt-1 text-xs text-bone-faint">
+                Để trống = dùng tên site. Ví dụ: @kênh Telegram của bạn.
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="wmm">Kiểu</Label>
+              <Select
+                id="wmm"
+                value={w.mode}
+                onChange={(e) => setW({ mode: e.target.value as WatermarkMode })}
+              >
+                <option value="tile">Lặp chéo khắp ảnh (khó cắt bỏ)</option>
+                <option value="corner">Một dòng ở góc dưới phải</option>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="wmc">Màu</Label>
+              <Select
+                id="wmc"
+                value={w.color}
+                onChange={(e) => setW({ color: e.target.value as WatermarkColor })}
+              >
+                <option value="light">Trắng</option>
+                <option value="dark">Đen</option>
+                <option value="gold">Màu nhấn</option>
+              </Select>
+            </div>
+            <Range
+              id="wmo"
+              label="Độ đậm"
+              value={Math.round(w.opacity * 100)}
+              min={5}
+              max={60}
+              unit="%"
+              onChange={(v) => setW({ opacity: v / 100 })}
+            />
+            <Range
+              id="wms"
+              label="Cỡ chữ"
+              value={w.size}
+              min={12}
+              max={48}
+              unit="px"
+              onChange={(v) => setW({ size: v })}
+            />
+            {w.mode === 'tile' && (
+              <Range
+                id="wma"
+                label="Góc nghiêng"
+                value={w.angle}
+                min={-60}
+                max={60}
+                unit="°"
+                onChange={(v) => setW({ angle: v })}
+              />
+            )}
+          </div>
+
+          <div className="space-y-3 border-t border-line pt-4">
+            <Toggle
+              checked={value.blockContextMenu}
+              onChange={(blockContextMenu) => onChange({ ...value, blockContextMenu })}
+              label="Chặn chuột phải và kéo thả trên ảnh"
+              hint="Đóng đường “Lưu ảnh thành…”. Cũng chặn giữ ngón tay lưu ảnh trên iPhone."
+            />
+            <Toggle
+              checked={value.blockShortcuts}
+              onChange={(blockShortcuts) => onChange({ ...value, blockShortcuts })}
+              label="Chặn phím tắt F12, Ctrl+Shift+I/J/C, Ctrl+U, Ctrl+S, Ctrl+P"
+              hint="Vẫn mở được từ menu của trình duyệt. Chặn thói quen, không chặn người rành. Trên Windows, bấm PrintScreen xong ảnh trong clipboard bị ghi đè."
+            />
+            <Toggle
+              checked={value.hideOnBlur}
+              onChange={(hideOnBlur) => onChange({ ...value, hideOnBlur })}
+              label="Làm mờ ảnh khi cửa sổ mất focus"
+              hint="Công cụ cắt màn hình (Win+Shift+S) lấy focus của cửa sổ, ảnh mờ đúng lúc đó và rõ lại khi quay về. Chụp trên điện thoại không bắt được; watermark lo phần đó."
+            />
+          </div>
+        </div>
+
+        <div>
+          <p className="kicker mb-2">Xem trước</p>
+          <div
+            className="wm relative aspect-[3/4] overflow-hidden border border-line bg-[radial-gradient(80%_60%_at_50%_35%,#5a4444,#1b1b21)]"
+            style={css as React.CSSProperties}
+          >
+            <span className="absolute inset-x-3 bottom-3 font-display text-lg text-bone">
+              Tên người mẫu
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-bone-faint">Mẫu ảnh 3:4, đúng cỡ như thẻ trên site.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Toggle({
+  checked,
+  onChange,
+  label,
+  hint,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <label className="block text-sm text-bone-dim">
+      <span className="flex items-center gap-3">
+        <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+        {label}
+      </span>
+      {hint && <span className="mt-1 block pl-7 text-xs text-bone-faint">{hint}</span>}
+    </label>
+  );
+}
+
+function Range({
+  id,
+  label,
+  value,
+  min,
+  max,
+  unit,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between">
+        <Label htmlFor={id}>{label}</Label>
+        <span className="text-xs tabular-nums text-bone-dim">
+          {value}
+          {unit}
+        </span>
+      </div>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-11 w-full accent-gold"
+      />
     </div>
   );
 }

@@ -351,4 +351,46 @@
         0 0;
     }
   }
+
+  /* ── Photo protection ───────────────────────────────────────
+     .wm draws the watermark over whatever it wraps. The image itself is
+     an SVG data URL in --wm-image, set on <html> from settings (and on
+     the CMS preview box directly), so the overlay never has to know
+     what it says. z-index 5 sits above the photo and its badges. */
+  .wm::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background-image: var(--wm-image, none);
+    background-repeat: var(--wm-repeat, repeat);
+    background-position: var(--wm-position, 0 0);
+    background-size: var(--wm-size, auto);
+  }
+
+  /* No drag-out, no long-press "Save image" on iOS. */
+  html.protect-media img,
+  html.protect-media video {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* While the window is not focused — snipping tools take focus. */
+  html.protect-hidden img,
+  html.protect-hidden video {
+    filter: blur(28px);
+    opacity: 0.4;
+    transition:
+      filter 0.15s,
+      opacity 0.15s;
+  }
+
+  @media print {
+    html.protect-media img,
+    html.protect-media video {
+      visibility: hidden;
+    }
+  }
 }

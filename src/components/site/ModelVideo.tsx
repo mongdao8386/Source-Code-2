@@ -31,12 +31,15 @@ export function ModelVideo({
 
   return (
     <figure className="mb-6">
-      <div className="relative aspect-[3/4] overflow-hidden bg-surface-1">
+      <div className="wm relative aspect-[3/4] overflow-hidden bg-surface-1">
         {playing ? (
           <video
             src={publicPhotoUrl(videoPath)}
             poster={poster || undefined}
             controls
+            controlsList="nodownload noremoteplayback"
+            disablePictureInPicture
+            onContextMenu={(e) => e.preventDefault()}
             autoPlay
             playsInline
             className="h-full w-full object-cover"

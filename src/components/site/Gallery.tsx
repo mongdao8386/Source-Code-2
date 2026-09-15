@@ -54,7 +54,7 @@ export function Gallery({
             key={p.id}
             type="button"
             onClick={() => setOpen(i)}
-            className="group block w-full overflow-hidden bg-surface-1"
+            className="wm group relative block w-full overflow-hidden bg-surface-1"
             aria-label={`${name} · ${tg('photo', { n: i + 1 })}`}
           >
             <Image
@@ -91,7 +91,7 @@ export function Gallery({
               <NavArrow dir="right" label={tg('next')} onClick={(e) => { e.stopPropagation(); step(1); }} />
             </>
           )}
-          <div className="relative max-h-[88vh] w-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="wm relative max-h-[88vh] w-auto" onClick={(e) => e.stopPropagation()}>
             <Image
               src={publicPhotoUrl(photos[open]!.storage_path)}
               alt={t(photos[open]!.alt, locale) || name}

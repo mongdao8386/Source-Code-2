@@ -58,6 +58,16 @@ each, shown as people — name, @username, a "Nhắn tin" button — on the home
 page, model pages, the footer, the mobile menu and the floating button.
 Nothing else on the public site is a contact.
 
+**Photo protection** lives under *Cài đặt → Bảo vệ ảnh*. A watermark — text,
+opacity, size, angle, tiled or corner — is drawn over every photo and video
+frame at render time, so changing it changes every photo at once and a
+screenshot always carries it. Beside it: right-click and drag on photos do
+nothing, F12 / Ctrl+Shift+I / Ctrl+U / Ctrl+S / Ctrl+P are swallowed, and
+photos blur while the window is not focused (snipping tools take focus). None
+of this stops a determined visitor — nothing in a browser can — and the raw
+files in the public bucket are still fetchable by URL; the point is that the
+easy routes go nowhere and what does get copied is visibly yours.
+
 ## Local development
 
 ```bash

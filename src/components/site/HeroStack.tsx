@@ -45,7 +45,7 @@ export function HeroStack({
             key={m.id}
             href={{ pathname: '/models/[slug]', params: { slug: m.slug } }}
             className={cn(
-              'frame-gold group relative block aspect-[3/4] overflow-hidden bg-surface-1',
+              'wm frame-gold group relative block aspect-[3/4] overflow-hidden bg-surface-1',
               'shadow-[0_30px_60px_-20px_rgba(0,0,0,0.8)] transition-transform duration-700 ease-lux',
               'hover:z-40 hover:scale-[1.03]',
               SLOT[i],
